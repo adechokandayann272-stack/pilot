@@ -37,7 +37,7 @@ Aucune chaîne de build. Pour un contrôle rapide, ouvrir `index.html` depuis un
 statique (`python3 -m http.server`) : la console du navigateur ne doit signaler aucune ressource
 manquante.
 
-## Réglages (bouton ⚙ en haut à droite)
+## Réglages (roue dentée sur le bord droit de l'écran)
 
 Les préférences sont **propres à ce navigateur** (clé `pilotage-reglages`) : elles ne sont jamais
 écrites dans le fichier `pilotage_*.json` partagé avec l'équipe.
