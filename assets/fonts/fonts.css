@@ -1,0 +1,25 @@
+/* Polices de l'interface.
+   L'application doit fonctionner hors ligne et depuis un simple dossier : aucun
+   fichier de police n'est téléchargé. On déclare donc « Instrument Sans » et
+   « JetBrains Mono » comme des alias vers les polices présentes sur la machine,
+   avec les mêmes métriques d'esprit (sans-serif humaniste / mono lisible). */
+
+@font-face{
+  font-family:"Instrument Sans";
+  font-style:normal;
+  font-weight:300 800;
+  font-display:swap;
+  src:local("Inter"),local("Inter Variable"),local("Söhne"),local("Segoe UI Variable"),
+      local("Segoe UI"),local("SF Pro Text"),local("Roboto"),local("Helvetica Neue"),
+      local("Arial");
+}
+
+@font-face{
+  font-family:"JetBrains Mono";
+  font-style:normal;
+  font-weight:300 800;
+  font-display:swap;
+  src:local("JetBrains Mono"),local("Cascadia Mono"),local("Cascadia Code"),
+      local("SF Mono"),local("Menlo"),local("Consolas"),local("Liberation Mono"),
+      local("DejaVu Sans Mono"),local("Courier New");
+}

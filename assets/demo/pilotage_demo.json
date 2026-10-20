@@ -1,0 +1,520 @@
+{
+ "demoGenere": "2026-10-20",
+ "version": 1,
+ "projet": {
+  "nom": "Refonte SIRH – Groupe Dupont",
+  "responsable": "Marie Lefèvre",
+  "fonction": "Chef de projet",
+  "modules": [
+   "Cadrage",
+   "Paramétrage",
+   "Recette",
+   "Formation",
+   "Déploiement"
+  ]
+ },
+ "base": {
+  "tasks": [
+   {
+    "n": 1,
+    "t": "Valider le périmètre du projet",
+    "lot": "Cadrage",
+    "role": "Pilote",
+    "resp": "Marie Lefèvre",
+    "fin": "2026-10-07",
+    "st": "À faire"
+   },
+   {
+    "n": 2,
+    "t": "Rédiger la note de cadrage",
+    "lot": "Cadrage",
+    "role": "Pilote",
+    "resp": "Marie Lefèvre",
+    "fin": "2026-10-09",
+    "st": "À faire"
+   },
+   {
+    "n": 3,
+    "t": "Cartographier les processus RH",
+    "lot": "Cadrage",
+    "role": "Consulté",
+    "resp": "Sophie Bernard",
+    "fin": "2026-10-12",
+    "st": "À faire"
+   },
+   {
+    "n": 4,
+    "t": "Recueillir les besoins paie",
+    "lot": "Cadrage",
+    "role": "Pilote",
+    "resp": "Thomas Petit",
+    "fin": "2026-10-13",
+    "st": "À faire"
+   },
+   {
+    "n": 5,
+    "t": "Signer le contrat éditeur",
+    "lot": "Cadrage",
+    "role": "Pilote",
+    "resp": "Marie Lefèvre",
+    "fin": "2026-10-16",
+    "st": "À faire"
+   },
+   {
+    "n": 6,
+    "t": "Définir la matrice des rôles",
+    "lot": "Paramétrage",
+    "role": "Consulté",
+    "resp": "Karim Haddad",
+    "fin": "2026-10-14",
+    "st": "À faire"
+   },
+   {
+    "n": 7,
+    "t": "Paramétrer les profils utilisateurs",
+    "lot": "Paramétrage",
+    "role": "Pilote",
+    "resp": "Paul Durand",
+    "fin": "2026-10-23",
+    "st": "En cours"
+   },
+   {
+    "n": 8,
+    "t": "Configurer les circuits de validation",
+    "lot": "Paramétrage",
+    "role": "Pilote",
+    "resp": "Paul Durand",
+    "fin": "2026-10-21",
+    "st": "Bloqué"
+   },
+   {
+    "n": 9,
+    "t": "Reprendre les données de paie",
+    "lot": "Paramétrage",
+    "role": "Pilote",
+    "resp": "Julie Moreau",
+    "fin": "2026-10-16",
+    "st": "En cours"
+   },
+   {
+    "n": 10,
+    "t": "Préparer les jeux de test",
+    "lot": "Recette",
+    "role": "Pilote",
+    "resp": "Sophie Bernard",
+    "fin": "2026-10-26",
+    "st": "À faire"
+   },
+   {
+    "n": 11,
+    "t": "Rédiger le plan de recette",
+    "lot": "Recette",
+    "role": "Pilote",
+    "resp": "Marie Lefèvre",
+    "fin": "2026-10-22",
+    "st": "En cours"
+   },
+   {
+    "n": 12,
+    "t": "Recetter les écrans de congés",
+    "lot": "Recette",
+    "role": "Consulté",
+    "resp": "Thomas Petit",
+    "fin": "2026-10-25",
+    "st": "À faire"
+   },
+   {
+    "n": 13,
+    "t": "Recetter les bulletins de paie",
+    "lot": "Recette",
+    "role": "Pilote",
+    "resp": "Julie Moreau",
+    "fin": "2026-10-18",
+    "st": "À faire"
+   },
+   {
+    "n": 14,
+    "t": "Transmettre la liste des key users",
+    "lot": "Formation",
+    "role": "Consulté",
+    "resp": "Sophie Bernard",
+    "fin": "2026-10-13",
+    "st": "En cours"
+   },
+   {
+    "n": 15,
+    "t": "Rédiger les supports de formation",
+    "lot": "Formation",
+    "role": "Consulté",
+    "resp": "Julie Moreau",
+    "st": "En cours"
+   },
+   {
+    "n": 16,
+    "t": "Former les key users",
+    "lot": "Formation",
+    "role": "Pilote",
+    "resp": "Sophie Bernard",
+    "fin": "2026-11-04",
+    "st": "À faire"
+   },
+   {
+    "n": 17,
+    "t": "Préparer le plan de déploiement",
+    "lot": "Déploiement",
+    "role": "Pilote",
+    "resp": "Karim Haddad",
+    "st": "À faire"
+   },
+   {
+    "n": 18,
+    "t": "Préparer le comité de pilotage",
+    "lot": "Pilotage",
+    "role": "Pilote",
+    "resp": "Marie Lefèvre",
+    "fin": "2026-10-29",
+    "st": "À faire"
+   },
+   {
+    "n": 19,
+    "t": "Migrer l'ancien annuaire",
+    "lot": "Déploiement",
+    "role": "Pilote",
+    "resp": "Karim Haddad",
+    "fin": "2026-11-09",
+    "st": "Annulé"
+   }
+  ],
+  "events": [
+   {
+    "id": "e1",
+    "par": "Marie Lefèvre",
+    "date": "2026-10-19",
+    "type": "Réunion",
+    "lib": "Comité projet hebdo · 9h-10h · Teams"
+   },
+   {
+    "id": "e2",
+    "par": "Paul Durand",
+    "date": "2026-10-19",
+    "type": "Réunion",
+    "lib": "Point éditeur · 14h-15h · Visio éditeur"
+   },
+   {
+    "id": "e3",
+    "par": "Sophie Bernard",
+    "date": "2026-10-21",
+    "type": "Atelier",
+    "lib": "Atelier recette · 14h-16h · Salle B"
+   },
+   {
+    "id": "e4",
+    "par": "Marie Lefèvre",
+    "date": "2026-10-22",
+    "type": "Réunion",
+    "lib": "Réunion éditeur · 11h-12h · Visio éditeur"
+   },
+   {
+    "id": "e5",
+    "par": "Marie Lefèvre",
+    "date": "2026-10-23",
+    "type": "Butoir",
+    "lib": "Remise du plan de recette · 17h"
+   },
+   {
+    "id": "e6",
+    "par": "Marie Lefèvre",
+    "date": "2026-10-28",
+    "type": "Comité",
+    "lib": "Comité de pilotage · 9h-10h · Salle du conseil"
+   },
+   {
+    "id": "e7",
+    "par": "Karim Haddad",
+    "date": "2026-10-30",
+    "type": "Contrainte",
+    "lib": "Gel des paramétrages · à partir du 30/10"
+   }
+  ]
+ },
+ "suivi": {
+  "1": {
+   "n": 1,
+   "fait": true,
+   "faitLe": "2026-10-14",
+   "com": [
+    {
+     "d": "2026-10-14",
+     "h": "17:10",
+     "by": "Marie Lefèvre",
+     "txt": "Périmètre validé en comité de lancement."
+    }
+   ]
+  },
+  "2": {
+   "n": 2,
+   "fait": true,
+   "faitLe": "2026-10-15",
+   "com": [
+    {
+     "d": "2026-10-15",
+     "h": "17:10",
+     "by": "Marie Lefèvre",
+     "txt": "Note diffusée à la direction et à l'équipe projet."
+    }
+   ]
+  },
+  "3": {
+   "n": 3,
+   "fait": true,
+   "faitLe": "2026-10-20",
+   "com": [
+    {
+     "d": "2026-10-20",
+     "h": "17:10",
+     "by": "Sophie Bernard",
+     "txt": "Processus cartographiés en atelier avec la RH."
+    }
+   ]
+  },
+  "4": {
+   "n": 4,
+   "fait": true,
+   "faitLe": "2026-10-19",
+   "com": [
+    {
+     "d": "2026-10-19",
+     "h": "17:10",
+     "by": "Thomas Petit",
+     "txt": "Besoins recueillis auprès de la paie."
+    }
+   ],
+   "hist": [
+    {
+     "d": "2026-10-20",
+     "h": "09:30",
+     "by": "Marie Lefèvre",
+     "champ": "Échéance",
+     "avant": "19/10",
+     "apres": "13/10"
+    }
+   ]
+  },
+  "5": {
+   "n": 5,
+   "fait": true,
+   "faitLe": "2026-10-20",
+   "com": [
+    {
+     "d": "2026-10-20",
+     "h": "17:10",
+     "by": "Marie Lefèvre",
+     "txt": "Contrat signé par la direction. Démarrage officiel lundi prochain."
+    }
+   ]
+  },
+  "6": {
+   "n": 6,
+   "fait": true,
+   "faitLe": "2026-10-20",
+   "com": [
+    {
+     "d": "2026-10-20",
+     "h": "17:10",
+     "by": "Karim Haddad",
+     "txt": "Matrice validée avec la DSI."
+    }
+   ]
+  },
+  "7": {
+   "n": 7,
+   "fait": false,
+   "faitLe": null,
+   "com": [
+    {
+     "d": "2026-10-20",
+     "h": "15:45",
+     "by": "Paul Durand",
+     "txt": "Paramétrage des profils à 70 %."
+    }
+   ],
+   "hist": [
+    {
+     "d": "2026-10-19",
+     "h": "16:05",
+     "by": "Paul Durand",
+     "champ": "Échéance",
+     "avant": "21/10",
+     "apres": "23/10"
+    }
+   ]
+  },
+  "8": {
+   "n": 8,
+   "fait": false,
+   "faitLe": null,
+   "com": [
+    {
+     "d": "2026-10-20",
+     "h": "16:20",
+     "by": "Paul Durand",
+     "txt": "En attente de la documentation technique de l'éditeur, relancé ce jour. Promesse pour jeudi."
+    },
+    {
+     "d": "2026-10-20",
+     "h": "09:10",
+     "by": "Paul Durand",
+     "txt": "Toujours sans retour de l'éditeur."
+    }
+   ],
+   "hist": [
+    {
+     "d": "2026-10-20",
+     "h": "09:15",
+     "by": "Paul Durand",
+     "champ": "Statut",
+     "avant": "En cours",
+     "apres": "Bloqué"
+    }
+   ]
+  },
+  "9": {
+   "n": 9,
+   "fait": false,
+   "faitLe": null,
+   "com": [
+    {
+     "d": "2026-10-20",
+     "h": "11:05",
+     "by": "Julie Moreau",
+     "txt": "Extraction en cours, 60 % des salariés traités."
+    }
+   ],
+   "hist": [
+    {
+     "d": "2026-10-20",
+     "h": "11:02",
+     "by": "Julie Moreau",
+     "champ": "Échéance",
+     "avant": "10/10",
+     "apres": "16/10"
+    }
+   ]
+  },
+  "10": {
+   "n": 10,
+   "fait": false,
+   "faitLe": null,
+   "com": [
+    {
+     "d": "2026-10-20",
+     "h": "08:55",
+     "by": "Sophie Bernard",
+     "txt": "Jeux de test à dériver des scénarios validés."
+    }
+   ]
+  },
+  "11": {
+   "n": 11,
+   "fait": false,
+   "faitLe": null,
+   "com": [
+    {
+     "d": "2026-10-20",
+     "h": "10:15",
+     "by": "Marie Lefèvre",
+     "txt": "Plan de recette rédigé à 80 %, reste les scénarios de paie."
+    }
+   ],
+   "hist": [
+    {
+     "d": "2026-10-20",
+     "h": "10:20",
+     "by": "Marie Lefèvre",
+     "champ": "Échéance",
+     "avant": "19/10",
+     "apres": "22/10"
+    }
+   ]
+  },
+  "13": {
+   "n": 13,
+   "fait": false,
+   "faitLe": null,
+   "com": [
+    {
+     "d": "2026-10-20",
+     "h": "14:30",
+     "by": "Julie Moreau",
+     "txt": "En attente des jeux de test définitifs."
+    }
+   ],
+   "hist": [
+    {
+     "d": "2026-10-20",
+     "h": "14:32",
+     "by": "Julie Moreau",
+     "champ": "Échéance",
+     "avant": "14/10",
+     "apres": "18/10"
+    }
+   ]
+  },
+  "14": {
+   "n": 14,
+   "fait": false,
+   "faitLe": null,
+   "com": [
+    {
+     "d": "2026-10-20",
+     "h": "09:40",
+     "by": "Sophie Bernard",
+     "txt": "Liste à consolider avec les managers de région."
+    }
+   ]
+  },
+  "19": {
+   "n": 19,
+   "fait": false,
+   "faitLe": null,
+   "com": [],
+   "hist": [
+    {
+     "d": "2026-10-20",
+     "h": "11:20",
+     "by": "Karim Haddad",
+     "champ": "Statut",
+     "avant": "À faire",
+     "apres": "Annulé"
+    }
+   ]
+  },
+  "20": {
+   "n": 20,
+   "cree": true,
+   "creeLe": "2026-10-20",
+   "par": "Sophie Bernard",
+   "fait": false,
+   "faitLe": null,
+   "task": {
+    "t": "Mettre à jour la matrice RACI",
+    "lot": "Cadrage",
+    "role": "Consulté",
+    "st": "À faire",
+    "fin": "2026-10-24"
+   },
+   "com": [
+    {
+     "d": "2026-10-20",
+     "h": "09:38",
+     "by": "Sophie Bernard",
+     "txt": "Créée à la suite de la réunion projet."
+    }
+   ]
+  }
+ },
+ "maj": {
+  "par": "Marie Lefèvre",
+  "le": "2026-10-20T16:54:45.954Z"
+ }
+}

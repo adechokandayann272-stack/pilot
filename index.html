@@ -9,10 +9,54 @@
 <meta name="theme-color" content="#1d5c8a">
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <link rel="icon" href="assets/img/favicon.svg" type="image/svg+xml">
-<link rel="alternate icon" href="assets/img/favicon-32.png" type="image/png" sizes="32x32">
-<link rel="apple-touch-icon" href="assets/img/apple-touch-icon.png">
+<link rel="apple-touch-icon" href="assets/img/favicon.svg">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="stylesheet" href="assets/fonts/fonts.css">
+<script>
+/* Veille d'erreurs : si un script échoue, on l'affiche au lieu de laisser des
+   boutons muets. Sert aussi de diagnostic quand l'app est déployée ailleurs. */
+(function(){
+  var shown=0;
+  function strip(u){try{return String(u).split("/").pop().split("?")[0]}catch(e){return ""}}
+  function show(msg,where){
+    try{
+      if(shown++>4) return;                       /* on n'empile pas 50 messages */
+      var b=document.getElementById("errBanner");
+      if(!b){
+        b=document.createElement("div");
+        b.id="errBanner"; b.setAttribute("role","alert");
+        b.style.cssText="position:sticky;top:0;z-index:9999;background:#b3261e;color:#fff;"
+          +"font:13px/1.45 system-ui,-apple-system,Segoe UI,sans-serif;padding:10px 14px;"
+          +"display:flex;gap:10px;align-items:flex-start;flex-wrap:wrap";
+        var close=document.createElement("button");
+        close.textContent="\u00d7"; close.title="Masquer";
+        close.style.cssText="order:3;background:transparent;color:#fff;border:0;font:20px/1 system-ui;cursor:pointer;padding:0 4px";
+        close.onclick=function(){b.remove()};
+        b.appendChild(close);
+        (document.body||document.documentElement).insertBefore(b,(document.body||document.documentElement).firstChild);
+      }
+      var t=document.createElement("div");
+      t.style.cssText="flex:1 1 280px;white-space:pre-wrap";
+      t.textContent=(b.querySelectorAll("[data-err]").length?"":"Erreur JavaScript : ")+msg+(where?" \u2014 "+where:"");
+      t.setAttribute("data-err","");
+      b.insertBefore(t,b.lastChild);
+      try{console.error("[poste de pilotage]",msg,where)}catch(e){}
+    }catch(e){}
+  }
+  window.__showErr=show;
+  window.addEventListener("error",function(e){
+    if(e&&e.target&&e.target!==window&&e.target.tagName){
+      if(e.target.tagName==="SCRIPT"||e.target.tagName==="LINK")
+        show("Ressource introuvable : "+strip(e.target.src||e.target.href));
+      return;                                        /* image/favicon : on ignore */
+    }
+    show((e&&e.message)||"erreur inconnue", e&&e.filename?strip(e.filename)+":"+e.lineno:"");
+  },true);
+  window.addEventListener("unhandledrejection",function(e){
+    var r=e&&e.reason; show("Promesse rejetée : "+((r&&r.message)||r||"raison inconnue"));
+  });
+})();
+</script>
 <style>
 /* Layout : bandeau date + semaine, puis deux colonnes — agenda horaire à gauche, file de tâches priorisée à droite */
 :root{
@@ -40,6 +84,12 @@
   color-scheme:dark}
 *{box-sizing:border-box}
 [hidden]{display:none!important}
+.noproj{display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap;
+  background:var(--late-soft);color:var(--fg);border:1px solid var(--late);border-radius:8px;
+  padding:10px 14px;font-size:13px;line-height:1.5}
+.noproj b{color:var(--late)}
+.noproj-acts{display:flex;gap:8px;flex-wrap:wrap}
+@media(max-width:640px){.noproj-acts{width:100%}.noproj-acts button{flex:1}}
 .maintabs{display:flex;gap:4px;border-bottom:1px solid var(--line);flex-wrap:wrap}
 .maintabs button{border:0;border-bottom:2px solid transparent;border-radius:0;background:transparent;padding:10px 14px;font-weight:600;color:var(--muted)}
 .maintabs button[aria-selected=true]{color:var(--accent);border-bottom-color:var(--accent)}
@@ -219,6 +269,13 @@ textarea#recap{width:100%;font-family:var(--f-mono);font-size:12px;background:va
       <div id="noApi" hidden style="margin-top:10px;color:var(--soon)">Ce navigateur ne permet pas d'enregistrer directement dans un fichier (Firefox, Safari, mobile…). Vos données seront enregistrées <b>dans ce navigateur</b> et vous pourrez les exporter en <code>.json</code> à tout moment. Pour le partage via le dossier OneDrive/Teams, utilisez Microsoft Edge ou Google Chrome.
         <div class="acts" style="margin-top:8px"><button id="openLocal">Ouvrir un fichier .json</button><input type="file" id="roFile" accept=".json" hidden></div></div></div>
   </div>
+  <div class="noproj" id="noProj" hidden>
+    <div><b>Aucun projet ouvert.</b> Tant qu'un fichier de projet n'est pas ouvert, les cases à cocher, les statuts et les commentaires ne peuvent pas être enregistrés : rien ne se passe quand vous cliquez.</div>
+    <div class="noproj-acts">
+      <button class="primary" id="noProjOpen">Ouvrir un projet</button>
+      <button id="noProjDemo">Ouvrir la démonstration</button>
+    </div>
+  </div>
   <nav class="maintabs" role="tablist" aria-label="Vues">
     <button role="tab" data-view="jour" aria-selected="true">Ma journée</button>
     <button role="tab" data-view="taches" aria-selected="false">Toutes les tâches</button>
@@ -343,7 +400,7 @@ textarea#recap{width:100%;font-family:var(--f-mono);font-size:12px;background:va
   </div>
 </div>
 
-<script src="assets/vendor/xlsx.full.min.js"></script>
+<script src="assets/vendor/xlsx.full.min.js" onerror="(function(){if(window.__xlsxFallback)return;window.__xlsxFallback=1;var s=document.createElement('script');s.src='https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js';s.onerror=function(){};document.head.appendChild(s);})()"></script>
 <script>
 let DATA = {tasks:[],events:[]};
 const TODAY_REAL = new Date();
@@ -365,6 +422,7 @@ let FH=null, LASTMOD=0, wchain=Promise.resolve(), ME=(store.get("pilotage-nom","
 const isDone=n=>!!(S[n]&&S[n].fait);
 const rec=n=>S[n]||(S[n]={n,fait:false,faitLe:null,com:[]});
 function setMode(m){const el=document.getElementById("storeInfo");
+  const np=document.getElementById("noProj"); if(np) np.hidden=!!FH;
   const M={on:["on",`Connecté au fichier partagé : vos modifications sont visibles par l'équipe et signées « ${ME} ».`],
     nofile:["off","Aucun fichier de données ouvert : rien n'est enregistré."],
     local:["on","Enregistré dans ce navigateur (pas dans un fichier partagé). Pensez à télécharger une sauvegarde .json."],
@@ -433,12 +491,12 @@ function applyProj(){const R=PROJ.responsable||"responsable";
   document.title="Poste de pilotage"+(PROJ.nom?" – "+PROJ.nom:"");
   document.querySelectorAll(".lbl-role").forEach(e=>e.firstChild.textContent="Rôle de "+R.split(" ")[0]);
   if(FH) document.getElementById("fname").textContent=FH.name+(FH.__local?" (stockage du navigateur)":"");}
-function mutate(fn){ if(!FH){setMode("nofile");render();return;}
+function mutate(fn){ if(!FH){setMode("nofile");prioNote="Ouvrez d'abord un projet (ou la démonstration) : sans fichier de données, cette modification ne peut pas être enregistrée.";render();return;}
   wchain=wchain.then(async()=>{const fresh=await readFile(); fresh.suivi=fresh.suivi||{}; fresh.base=fresh.base||{tasks:[],events:[]}; fresh.base.events=fresh.base.events||[];
       fn(fresh); fresh.maj={par:ME,le:new Date().toISOString()}; await writeFile(fresh); applyFile(fresh); setMode(modeOf());})
     .catch(e=>{console.error(e); setMode("err");});}
 function save(n){
-  if(!FH){setMode("nofile");render();return;}
+  if(!FH){setMode("nofile");prioNote="Ouvrez d'abord un projet (ou la démonstration) : sans fichier de données, cette modification ne peut pas être enregistrée.";render();return;}
   const v=S[n]?JSON.parse(JSON.stringify(S[n])):null;
   wchain=wchain.then(async()=>{const fresh=await readFile(); fresh.suivi=fresh.suivi||{};
       if(v) fresh.suivi[n]=v; else delete fresh.suivi[n];
@@ -915,15 +973,50 @@ document.getElementById("closeProj").onclick=()=>{
   document.title="Poste de pilotage";
   setMode("nofile"); refreshSetup(); render();
 };
+/* Le projet de démonstration est livré avec des dates fixes : on le décale pour
+   qu'il reste toujours « autour d'aujourd'hui », sinon il vieillit et toutes ses
+   tâches finissent en retard. */
+function decalerDemo(o){
+  const a=o&&o.demoGenere; if(!a) return o;
+  const t0=Date.parse(a+"T12:00:00"); if(isNaN(t0)) return o;
+  const t1=Date.parse(iso(new Date())+"T12:00:00");
+  const jours=Math.round((t1-t0)/86400000); if(!jours) return o;
+  const sh=v=>{ if(typeof v!=="string"||!/^\d{4}-\d{2}-\d{2}$/.test(v)) return v;
+    const d=new Date(v+"T12:00:00"); if(isNaN(d)) return v; d.setDate(d.getDate()+jours); return iso(d); };
+  ((o.base&&o.base.tasks)||[]).forEach(t=>{ t.deb=sh(t.deb); t.fin=sh(t.fin); });
+  ((o.base&&o.base.events)||[]).forEach(e=>{ e.date=sh(e.date); });
+  Object.values(o.suivi||{}).forEach(r=>{ if(!r) return; r.faitLe=sh(r.faitLe); r.creeLe=sh(r.creeLe);
+    (r.com||[]).forEach(c=>{ c.d=sh(c.d); }); });
+  o.demoGenere=iso(new Date());
+  return o;
+}
+/* Copie de secours du projet de démonstration : elle permet d'ouvrir la démo même
+   quand la page est ouverte par double-clic (file://), où fetch() est bloqué. */
+const DEMO_FALLBACK={"demoGenere":"2026-10-20","version":1,"projet":{"nom":"Refonte SIRH – Groupe Dupont","responsable":"Marie Lefèvre","fonction":"Chef de projet","modules":["Cadrage","Paramétrage","Recette","Formation","Déploiement"]},"base":{"tasks":[{"n":1,"t":"Valider le périmètre du projet","lot":"Cadrage","role":"Pilote","resp":"Marie Lefèvre","fin":"2026-10-07","st":"À faire"},{"n":2,"t":"Rédiger la note de cadrage","lot":"Cadrage","role":"Pilote","resp":"Marie Lefèvre","fin":"2026-10-09","st":"À faire"},{"n":3,"t":"Cartographier les processus RH","lot":"Cadrage","role":"Consulté","resp":"Sophie Bernard","fin":"2026-10-12","st":"À faire"},{"n":4,"t":"Recueillir les besoins paie","lot":"Cadrage","role":"Pilote","resp":"Thomas Petit","fin":"2026-10-13","st":"À faire"},{"n":5,"t":"Signer le contrat éditeur","lot":"Cadrage","role":"Pilote","resp":"Marie Lefèvre","fin":"2026-10-16","st":"À faire"},{"n":6,"t":"Définir la matrice des rôles","lot":"Paramétrage","role":"Consulté","resp":"Karim Haddad","fin":"2026-10-14","st":"À faire"},{"n":7,"t":"Paramétrer les profils utilisateurs","lot":"Paramétrage","role":"Pilote","resp":"Paul Durand","fin":"2026-10-23","st":"En cours"},{"n":8,"t":"Configurer les circuits de validation","lot":"Paramétrage","role":"Pilote","resp":"Paul Durand","fin":"2026-10-21","st":"Bloqué"},{"n":9,"t":"Reprendre les données de paie","lot":"Paramétrage","role":"Pilote","resp":"Julie Moreau","fin":"2026-10-16","st":"En cours"},{"n":10,"t":"Préparer les jeux de test","lot":"Recette","role":"Pilote","resp":"Sophie Bernard","fin":"2026-10-26","st":"À faire"},{"n":11,"t":"Rédiger le plan de recette","lot":"Recette","role":"Pilote","resp":"Marie Lefèvre","fin":"2026-10-22","st":"En cours"},{"n":12,"t":"Recetter les écrans de congés","lot":"Recette","role":"Consulté","resp":"Thomas Petit","fin":"2026-10-25","st":"À faire"},{"n":13,"t":"Recetter les bulletins de paie","lot":"Recette","role":"Pilote","resp":"Julie Moreau","fin":"2026-10-18","st":"À faire"},{"n":14,"t":"Transmettre la liste des key users","lot":"Formation","role":"Consulté","resp":"Sophie Bernard","fin":"2026-10-13","st":"En cours"},{"n":15,"t":"Rédiger les supports de formation","lot":"Formation","role":"Consulté","resp":"Julie Moreau","st":"En cours"},{"n":16,"t":"Former les key users","lot":"Formation","role":"Pilote","resp":"Sophie Bernard","fin":"2026-11-04","st":"À faire"},{"n":17,"t":"Préparer le plan de déploiement","lot":"Déploiement","role":"Pilote","resp":"Karim Haddad","st":"À faire"},{"n":18,"t":"Préparer le comité de pilotage","lot":"Pilotage","role":"Pilote","resp":"Marie Lefèvre","fin":"2026-10-29","st":"À faire"},{"n":19,"t":"Migrer l'ancien annuaire","lot":"Déploiement","role":"Pilote","resp":"Karim Haddad","fin":"2026-11-09","st":"Annulé"}],"events":[{"id":"e1","par":"Marie Lefèvre","date":"2026-10-19","type":"Réunion","lib":"Comité projet hebdo · 9h-10h · Teams"},{"id":"e2","par":"Paul Durand","date":"2026-10-19","type":"Réunion","lib":"Point éditeur · 14h-15h · Visio éditeur"},{"id":"e3","par":"Sophie Bernard","date":"2026-10-21","type":"Atelier","lib":"Atelier recette · 14h-16h · Salle B"},{"id":"e4","par":"Marie Lefèvre","date":"2026-10-22","type":"Réunion","lib":"Réunion éditeur · 11h-12h · Visio éditeur"},{"id":"e5","par":"Marie Lefèvre","date":"2026-10-23","type":"Butoir","lib":"Remise du plan de recette · 17h"},{"id":"e6","par":"Marie Lefèvre","date":"2026-10-28","type":"Comité","lib":"Comité de pilotage · 9h-10h · Salle du conseil"},{"id":"e7","par":"Karim Haddad","date":"2026-10-30","type":"Contrainte","lib":"Gel des paramétrages · à partir du 30/10"}]},"suivi":{"1":{"n":1,"fait":true,"faitLe":"2026-10-14","com":[{"d":"2026-10-14","h":"17:10","by":"Marie Lefèvre","txt":"Périmètre validé en comité de lancement."}]},"2":{"n":2,"fait":true,"faitLe":"2026-10-15","com":[{"d":"2026-10-15","h":"17:10","by":"Marie Lefèvre","txt":"Note diffusée à la direction et à l'équipe projet."}]},"3":{"n":3,"fait":true,"faitLe":"2026-10-20","com":[{"d":"2026-10-20","h":"17:10","by":"Sophie Bernard","txt":"Processus cartographiés en atelier avec la RH."}]},"4":{"n":4,"fait":true,"faitLe":"2026-10-19","com":[{"d":"2026-10-19","h":"17:10","by":"Thomas Petit","txt":"Besoins recueillis auprès de la paie."}],"hist":[{"d":"2026-10-20","h":"09:30","by":"Marie Lefèvre","champ":"Échéance","avant":"19/10","apres":"13/10"}]},"5":{"n":5,"fait":true,"faitLe":"2026-10-20","com":[{"d":"2026-10-20","h":"17:10","by":"Marie Lefèvre","txt":"Contrat signé par la direction. Démarrage officiel lundi prochain."}]},"6":{"n":6,"fait":true,"faitLe":"2026-10-20","com":[{"d":"2026-10-20","h":"17:10","by":"Karim Haddad","txt":"Matrice validée avec la DSI."}]},"7":{"n":7,"fait":false,"faitLe":null,"com":[{"d":"2026-10-20","h":"15:45","by":"Paul Durand","txt":"Paramétrage des profils à 70 %."}],"hist":[{"d":"2026-10-19","h":"16:05","by":"Paul Durand","champ":"Échéance","avant":"21/10","apres":"23/10"}]},"8":{"n":8,"fait":false,"faitLe":null,"com":[{"d":"2026-10-20","h":"16:20","by":"Paul Durand","txt":"En attente de la documentation technique de l'éditeur, relancé ce jour. Promesse pour jeudi."},{"d":"2026-10-20","h":"09:10","by":"Paul Durand","txt":"Toujours sans retour de l'éditeur."}],"hist":[{"d":"2026-10-20","h":"09:15","by":"Paul Durand","champ":"Statut","avant":"En cours","apres":"Bloqué"}]},"9":{"n":9,"fait":false,"faitLe":null,"com":[{"d":"2026-10-20","h":"11:05","by":"Julie Moreau","txt":"Extraction en cours, 60 % des salariés traités."}],"hist":[{"d":"2026-10-20","h":"11:02","by":"Julie Moreau","champ":"Échéance","avant":"10/10","apres":"16/10"}]},"10":{"n":10,"fait":false,"faitLe":null,"com":[{"d":"2026-10-20","h":"08:55","by":"Sophie Bernard","txt":"Jeux de test à dériver des scénarios validés."}]},"11":{"n":11,"fait":false,"faitLe":null,"com":[{"d":"2026-10-20","h":"10:15","by":"Marie Lefèvre","txt":"Plan de recette rédigé à 80 %, reste les scénarios de paie."}],"hist":[{"d":"2026-10-20","h":"10:20","by":"Marie Lefèvre","champ":"Échéance","avant":"19/10","apres":"22/10"}]},"13":{"n":13,"fait":false,"faitLe":null,"com":[{"d":"2026-10-20","h":"14:30","by":"Julie Moreau","txt":"En attente des jeux de test définitifs."}],"hist":[{"d":"2026-10-20","h":"14:32","by":"Julie Moreau","champ":"Échéance","avant":"14/10","apres":"18/10"}]},"14":{"n":14,"fait":false,"faitLe":null,"com":[{"d":"2026-10-20","h":"09:40","by":"Sophie Bernard","txt":"Liste à consolider avec les managers de région."}]},"19":{"n":19,"fait":false,"faitLe":null,"com":[],"hist":[{"d":"2026-10-20","h":"11:20","by":"Karim Haddad","champ":"Statut","avant":"À faire","apres":"Annulé"}]},"20":{"n":20,"cree":true,"creeLe":"2026-10-20","par":"Sophie Bernard","fait":false,"faitLe":null,"task":{"t":"Mettre à jour la matrice RACI","lot":"Cadrage","role":"Consulté","st":"À faire","fin":"2026-10-24"},"com":[{"d":"2026-10-20","h":"09:38","by":"Sophie Bernard","txt":"Créée à la suite de la réunion projet."}]}},"maj":{"par":"Marie Lefèvre","le":"2026-10-20T16:54:45.954Z"}};
 document.getElementById("demoLoad").onclick=async()=>{
   try{
-    const res=await fetch("assets/demo/pilotage_demo.json",{cache:"no-store"});
-    if(!res.ok) throw new Error("fichier de démonstration introuvable ("+res.status+")");
-    await importLocalText(await res.text(),"pilotage_demo.json");
-    prioNote="Projet de démonstration « Refonte SIRH – CERP » ouvert. Il vit dans ce navigateur : utilisez « Sauvegarder (.json) » pour en garder une copie.";
+    let obj=null;
+    try{
+      const res=await fetch("assets/demo/pilotage_demo.json",{cache:"no-store"});
+      if(res.ok) obj=await res.json();
+    }catch(e){} /* file://, aperçu en iframe sandbox… : on utilise la copie de secours */
+    if(!obj) obj=JSON.parse(JSON.stringify(DEMO_FALLBACK));
+    const demo=await importLocalText(JSON.stringify(decalerDemo(obj)),"pilotage_demo.json");
+    const nomDemo=demo&&demo.projet&&demo.projet.nom;
+    prioNote=(nomDemo?`Projet de démonstration « ${nomDemo} » ouvert.`:"Projet de démonstration ouvert.")+" Il vit dans ce navigateur : utilisez « Sauvegarder (.json) » pour en garder une copie.";
     render();
   }catch(err){prioNote="Démonstration indisponible : "+(err&&err.message||err);render();}
 };
+/* Bandeau « aucun projet ouvert » : il propose les deux seules actions utiles. */
+(function(){
+  const o=document.getElementById("noProjOpen"), dm=document.getElementById("noProjDemo");
+  if(o) o.onclick=()=>{
+    const b=window.showOpenFilePicker?document.getElementById("openFile")
+      :(document.getElementById("openLocal")||document.getElementById("roFile"));
+    if(b) b.click();
+  };
+  if(dm) dm.onclick=()=>{ const b=document.getElementById("demoLoad"); if(b) b.click(); };
+})();
 document.getElementById("saveName").onclick=()=>{const v=document.getElementById("userName").value.trim(); if(!v) return; ME=v; store.set("pilotage-nom",v); refreshSetup(); setMode(modeOf());};
 const HAS_FS=!!window.showOpenFilePicker;
 if(!HAS_FS){document.getElementById("openFile").hidden=true; document.getElementById("noApi").hidden=false;}
@@ -969,7 +1062,7 @@ const XD=v=>{if(v==null||v==="") return null; if(v instanceof Date) return iso(v
   const m=String(v).match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/); if(m) return `${m[3]}-${m[2].padStart(2,"0")}-${m[1].padStart(2,"0")}`; const m2=String(v).match(/^\d{4}-\d{2}-\d{2}/); return m2?m2[0]:null;};
 const XT2=v=>{if(v==null||v==="") return ""; if(typeof v==="number"){const mn=Math.round(v*1440)%1440; return String(Math.floor(mn/60)).padStart(2,"0")+":"+String(mn%60).padStart(2,"0");} const m=String(v).match(/(\d{1,2})[:h](\d{2})?/); return m?m[1].padStart(2,"0")+":"+(m[2]||"00"):"";};
 async function readTemplate(file){
-  if(!window.XLSX) throw new Error("La lecture Excel nécessite une connexion internet.");
+  if(!window.XLSX) throw new Error("Le module de lecture Excel (assets/vendor/xlsx.full.min.js) n'a pas pu être chargé. Sans lui, créez le projet sans modèle Excel ou vérifiez que le dossier assets est bien à côté de index.html.");
   const wb=XLSX.read(await file.arrayBuffer(),{cellDates:false}); const tasks=[], events=[];
   const ts=wb.Sheets["Tâches"]||wb.Sheets[wb.SheetNames[0]];
   XLSX.utils.sheet_to_json(ts,{defval:""}).forEach((r,i)=>{const t=(r["Tâche"]||r["Tache"]||"").toString().trim(); if(!t) return;
@@ -1086,9 +1179,11 @@ function setView(v){ VIEW=v;
   const vt=document.getElementById("view-taches"); vt.hidden=v!=="taches"; vt.style.display=v==="taches"?"flex":"none";
   document.getElementById("view-bilan").hidden=v==="jour"||v==="taches";
   document.querySelector(".nav").style.visibility=v==="jour"?"visible":"hidden";
+  const TITRES={taches:"Toutes les tâches",bilan:"Bilan",copil:"Kit COPIL",reunion:"Réunion",relances:"Relances",risques:"Risques & décisions"};
   if(v==="taches"){ document.getElementById("title").textContent="Toutes les tâches"; renderAllTasks(); }
   else if(v==="jour") render();
-  else { if(!BF.srcdoc) BF.srcdoc=BILAN_SRC; else if(BREADY) BF.contentWindow.postMessage({type:"tab",tab:v},"*"); }
+  else { document.getElementById("title").textContent=TITRES[v]||"Poste de pilotage";
+    if(!BF.srcdoc) BF.srcdoc=BILAN_SRC; else if(BREADY) BF.contentWindow.postMessage({type:"tab",tab:v},"*"); }
   try{store.set("pilotage-vue",v)}catch(e){} }
 document.querySelectorAll(".maintabs button").forEach(b=>b.onclick=()=>setView(b.dataset.view));
 
@@ -1243,5 +1338,5 @@ if("serviceWorker" in navigator && (location.protocol==="https:" || location.hos
   window.addEventListener("load",()=>{navigator.serviceWorker.register("sw.js").catch(()=>{})});
 }
 </script>
-<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a4d900d8ef2222a5',t:'MTc5MjUwOTU5Mg=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</body>
 </html>
