@@ -13,7 +13,7 @@ index.html                        l'application (HTML + CSS + JS, sans build)
 manifest.webmanifest              installation « application »
 sw.js                             fonctionnement hors ligne (réseau d'abord)
 assets/demo/pilotage_demo.json    projet de démonstration
-assets/fonts/                      NotionInter (Inter variable, hors ligne)
+assets/fonts/                      Epilogue + Gowun Batang (hors ligne)
 assets/img/favicon.svg            icône
 assets/vendor/xlsx.full.min.js    lecture des modèles Excel (SheetJS, licence Apache-2.0)
 ```
@@ -44,7 +44,7 @@ Les préférences sont **propres à ce navigateur** (clé `pilotage-reglages`) :
 | Réglage | Valeurs |
 |---|---|
 | Thème | automatique (suit le système), clair, foncé — appliqué à l’interface |
-| Police | NotionInter (défaut, Inter), système, classique (serif), compacte (Arial), mono |
+| Police | Epilogue + Gowun Batang (défaut), système, classique (serif), compacte (Arial), mono |
 | Taille du texte | petite, normale, grande |
 | Densité | confortable, compacte (plus de lignes visibles) |
 | Accessibilité | réduire les animations, contraste renforcé |
@@ -52,5 +52,6 @@ Les préférences sont **propres à ce navigateur** (clé `pilotage-reglages`) :
 | Rappel de sauvegarde | tous les 7 / 14 / 30 jours (ou jamais) |
 | Divers | réouvrir le dernier projet, rétablir les réglages par défaut |
 
-La police par défaut, **NotionInter**, est Inter (fichiers dans `assets/fonts/`) : elle reste
-disponible hors ligne. Les autres choix utilisent les familles présentes sur la machine.
+La police par défaut couple **Epilogue** (interface) et **Gowun Batang** (titres),
+fichiers dans `assets/fonts/` : disponible hors ligne. Les autres choix utilisent
+les familles présentes sur la machine.

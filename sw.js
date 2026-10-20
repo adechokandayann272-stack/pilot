@@ -3,14 +3,18 @@
    le serveur est donc visible dès le rechargement suivant (pas de page figée sur
    une ancienne version), tout en gardant l'application utilisable hors ligne. */
 
-const CACHE = "poste-pilotage-v3";
+const CACHE = "poste-pilotage-v4";
 const CORE = [
   "./",
   "./index.html",
   "./manifest.webmanifest",
   "./assets/fonts/fonts.css",
-  "./assets/fonts/inter-latin.woff2",
-  "./assets/fonts/inter-latin-ext.woff2",
+  "./assets/fonts/epilogue-latin.woff2",
+  "./assets/fonts/epilogue-latin-ext.woff2",
+  "./assets/fonts/gowun-latin-400.woff2",
+  "./assets/fonts/gowun-latin-700.woff2",
+  "./assets/fonts/gowun-latin-ext-400.woff2",
+  "./assets/fonts/gowun-latin-ext-700.woff2",
   "./assets/img/favicon.svg"
 ];
 
