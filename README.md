@@ -13,7 +13,7 @@ index.html                        l'application (HTML + CSS + JS, sans build)
 manifest.webmanifest              installation « application »
 sw.js                             fonctionnement hors ligne (réseau d'abord)
 assets/demo/pilotage_demo.json    projet de démonstration
-assets/fonts/fonts.css            alias de polices système (aucun téléchargement)
+assets/fonts/                      NotionInter (Inter variable, hors ligne)
 assets/img/favicon.svg            icône
 assets/vendor/xlsx.full.min.js    lecture des modèles Excel (SheetJS, licence Apache-2.0)
 ```
@@ -36,7 +36,7 @@ Aucune chaîne de build. Pour un contrôle rapide, ouvrir `index.html` depuis un
 statique (`python3 -m http.server`) : la console du navigateur ne doit signaler aucune ressource
 manquante.
 
-## Réglages (roue dentée sur le bord droit de l'écran)
+## Réglages (en bas de la barre latérale)
 
 Les préférences sont **propres à ce navigateur** (clé `pilotage-reglages`) : elles ne sont jamais
 écrites dans le fichier `pilotage_*.json` partagé avec l'équipe.
@@ -44,7 +44,7 @@ Les préférences sont **propres à ce navigateur** (clé `pilotage-reglages`) :
 | Réglage | Valeurs |
 |---|---|
 | Thème | automatique (suit le système), clair, foncé — appliqué à l’interface |
-| Police | humaniste (défaut), système, classique (serif), compacte (Arial), mono |
+| Police | NotionInter (défaut, Inter), système, classique (serif), compacte (Arial), mono |
 | Taille du texte | petite, normale, grande |
 | Densité | confortable, compacte (plus de lignes visibles) |
 | Accessibilité | réduire les animations, contraste renforcé |
@@ -52,5 +52,5 @@ Les préférences sont **propres à ce navigateur** (clé `pilotage-reglages`) :
 | Rappel de sauvegarde | tous les 7 / 14 / 30 jours (ou jamais) |
 | Divers | réouvrir le dernier projet, rétablir les réglages par défaut |
 
-Aucune police n'est téléchargée : le choix se fait parmi des familles présentes sur la machine,
-pour que l'application reste utilisable hors ligne.
+La police par défaut, **NotionInter**, est Inter (fichiers dans `assets/fonts/`) : elle reste
+disponible hors ligne. Les autres choix utilisent les familles présentes sur la machine.
