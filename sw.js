@@ -9,7 +9,8 @@ const CORE = [
   "./index.html",
   "./manifest.webmanifest",
   "./assets/fonts/fonts.css",
-  "./assets/img/favicon.svg"
+  "./assets/img/favicon.svg",
+  "./assets/vendor/xlsx.full.min.js"
 ];
 
 self.addEventListener("install", event => {

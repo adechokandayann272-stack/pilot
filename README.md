@@ -37,7 +37,9 @@ Aucune chaîne de build. Pour un contrôle rapide, ouvrir `index.html` depuis un
 statique (`python3 -m http.server`) : la console du navigateur ne doit signaler aucune ressource
 manquante.
 
-## Réglages (roue dentée sur le bord droit de l'écran)
+## Navigation et réglages
+
+La navigation principale se trouve dans la barre latérale gauche, repliable sur ordinateur et en tiroir sur mobile. Les actions de fichier (ouvrir, sauvegarder une copie JSON, exporter dans Excel et lancer la démo) y restent accessibles. Les réglages sont au bas de cette barre latérale.
 
 Les préférences sont **propres à ce navigateur** (clé `pilotage-reglages`) : elles ne sont jamais
 écrites dans le fichier `pilotage_*.json` partagé avec l'équipe.
