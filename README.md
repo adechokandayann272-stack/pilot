@@ -1,8 +1,7 @@
 # Poste de pilotage
 
 Application web d'une seule page (aucun serveur, aucune base de données) pour piloter un projet :
-agenda de la semaine, tâches priorisées, bilan de période, kit COPIL, ordre du jour et compte-rendu
-de réunion, relances, registre des risques et des décisions.
+agenda de la semaine et tâches priorisées.
 
 Les données vivent dans un fichier `pilotage_*.json` rangé dans le dossier partagé du projet
 (OneDrive / Teams / disque réseau), ou à défaut dans le navigateur.
@@ -44,7 +43,7 @@ Les préférences sont **propres à ce navigateur** (clé `pilotage-reglages`) :
 
 | Réglage | Valeurs |
 |---|---|
-| Thème | automatique (suit le système), clair, foncé — appliqué aussi aux onglets Bilan / COPIL / Réunion / Risques |
+| Thème | automatique (suit le système), clair, foncé — appliqué à l’interface |
 | Police | humaniste (défaut), système, classique (serif), compacte (Arial), mono |
 | Taille du texte | petite, normale, grande |
 | Densité | confortable, compacte (plus de lignes visibles) |
