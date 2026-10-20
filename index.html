@@ -12,6 +12,51 @@
 <link rel="apple-touch-icon" href="assets/img/favicon.svg">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="stylesheet" href="assets/fonts/fonts.css">
+<script>
+/* Veille d'erreurs : si un script échoue, on l'affiche au lieu de laisser des
+   boutons muets. Sert aussi de diagnostic quand l'app est déployée ailleurs. */
+(function(){
+  var shown=0;
+  function strip(u){try{return String(u).split("/").pop().split("?")[0]}catch(e){return ""}}
+  function show(msg,where){
+    try{
+      if(shown++>4) return;                       /* on n'empile pas 50 messages */
+      var b=document.getElementById("errBanner");
+      if(!b){
+        b=document.createElement("div");
+        b.id="errBanner"; b.setAttribute("role","alert");
+        b.style.cssText="position:sticky;top:0;z-index:9999;background:#b3261e;color:#fff;"
+          +"font:13px/1.45 system-ui,-apple-system,Segoe UI,sans-serif;padding:10px 14px;"
+          +"display:flex;gap:10px;align-items:flex-start;flex-wrap:wrap";
+        var close=document.createElement("button");
+        close.textContent="\u00d7"; close.title="Masquer";
+        close.style.cssText="order:3;background:transparent;color:#fff;border:0;font:20px/1 system-ui;cursor:pointer;padding:0 4px";
+        close.onclick=function(){b.remove()};
+        b.appendChild(close);
+        (document.body||document.documentElement).insertBefore(b,(document.body||document.documentElement).firstChild);
+      }
+      var t=document.createElement("div");
+      t.style.cssText="flex:1 1 280px;white-space:pre-wrap";
+      t.textContent=(b.querySelectorAll("[data-err]").length?"":"Erreur JavaScript : ")+msg+(where?" \u2014 "+where:"");
+      t.setAttribute("data-err","");
+      b.insertBefore(t,b.lastChild);
+      try{console.error("[poste de pilotage]",msg,where)}catch(e){}
+    }catch(e){}
+  }
+  window.__showErr=show;
+  window.addEventListener("error",function(e){
+    if(e&&e.target&&e.target!==window&&e.target.tagName){
+      if(e.target.tagName==="SCRIPT"||e.target.tagName==="LINK")
+        show("Ressource introuvable : "+strip(e.target.src||e.target.href));
+      return;                                        /* image/favicon : on ignore */
+    }
+    show((e&&e.message)||"erreur inconnue", e&&e.filename?strip(e.filename)+":"+e.lineno:"");
+  },true);
+  window.addEventListener("unhandledrejection",function(e){
+    var r=e&&e.reason; show("Promesse rejetée : "+((r&&r.message)||r||"raison inconnue"));
+  });
+})();
+</script>
 <style>
 /* Layout : bandeau date + semaine, puis deux colonnes — agenda horaire à gauche, file de tâches priorisée à droite */
 :root{
@@ -39,6 +84,12 @@
   color-scheme:dark}
 *{box-sizing:border-box}
 [hidden]{display:none!important}
+.noproj{display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap;
+  background:var(--late-soft);color:var(--fg);border:1px solid var(--late);border-radius:8px;
+  padding:10px 14px;font-size:13px;line-height:1.5}
+.noproj b{color:var(--late)}
+.noproj-acts{display:flex;gap:8px;flex-wrap:wrap}
+@media(max-width:640px){.noproj-acts{width:100%}.noproj-acts button{flex:1}}
 .maintabs{display:flex;gap:4px;border-bottom:1px solid var(--line);flex-wrap:wrap}
 .maintabs button{border:0;border-bottom:2px solid transparent;border-radius:0;background:transparent;padding:10px 14px;font-weight:600;color:var(--muted)}
 .maintabs button[aria-selected=true]{color:var(--accent);border-bottom-color:var(--accent)}
@@ -218,6 +269,13 @@ textarea#recap{width:100%;font-family:var(--f-mono);font-size:12px;background:va
       <div id="noApi" hidden style="margin-top:10px;color:var(--soon)">Ce navigateur ne permet pas d'enregistrer directement dans un fichier (Firefox, Safari, mobile…). Vos données seront enregistrées <b>dans ce navigateur</b> et vous pourrez les exporter en <code>.json</code> à tout moment. Pour le partage via le dossier OneDrive/Teams, utilisez Microsoft Edge ou Google Chrome.
         <div class="acts" style="margin-top:8px"><button id="openLocal">Ouvrir un fichier .json</button><input type="file" id="roFile" accept=".json" hidden></div></div></div>
   </div>
+  <div class="noproj" id="noProj" hidden>
+    <div><b>Aucun projet ouvert.</b> Tant qu'un fichier de projet n'est pas ouvert, les cases à cocher, les statuts et les commentaires ne peuvent pas être enregistrés : rien ne se passe quand vous cliquez.</div>
+    <div class="noproj-acts">
+      <button class="primary" id="noProjOpen">Ouvrir un projet</button>
+      <button id="noProjDemo">Ouvrir la démonstration</button>
+    </div>
+  </div>
   <nav class="maintabs" role="tablist" aria-label="Vues">
     <button role="tab" data-view="jour" aria-selected="true">Ma journée</button>
     <button role="tab" data-view="taches" aria-selected="false">Toutes les tâches</button>
@@ -364,6 +422,7 @@ let FH=null, LASTMOD=0, wchain=Promise.resolve(), ME=(store.get("pilotage-nom","
 const isDone=n=>!!(S[n]&&S[n].fait);
 const rec=n=>S[n]||(S[n]={n,fait:false,faitLe:null,com:[]});
 function setMode(m){const el=document.getElementById("storeInfo");
+  const np=document.getElementById("noProj"); if(np) np.hidden=!!FH;
   const M={on:["on",`Connecté au fichier partagé : vos modifications sont visibles par l'équipe et signées « ${ME} ».`],
     nofile:["off","Aucun fichier de données ouvert : rien n'est enregistré."],
     local:["on","Enregistré dans ce navigateur (pas dans un fichier partagé). Pensez à télécharger une sauvegarde .json."],
@@ -432,12 +491,12 @@ function applyProj(){const R=PROJ.responsable||"responsable";
   document.title="Poste de pilotage"+(PROJ.nom?" – "+PROJ.nom:"");
   document.querySelectorAll(".lbl-role").forEach(e=>e.firstChild.textContent="Rôle de "+R.split(" ")[0]);
   if(FH) document.getElementById("fname").textContent=FH.name+(FH.__local?" (stockage du navigateur)":"");}
-function mutate(fn){ if(!FH){setMode("nofile");render();return;}
+function mutate(fn){ if(!FH){setMode("nofile");prioNote="Ouvrez d'abord un projet (ou la démonstration) : sans fichier de données, cette modification ne peut pas être enregistrée.";render();return;}
   wchain=wchain.then(async()=>{const fresh=await readFile(); fresh.suivi=fresh.suivi||{}; fresh.base=fresh.base||{tasks:[],events:[]}; fresh.base.events=fresh.base.events||[];
       fn(fresh); fresh.maj={par:ME,le:new Date().toISOString()}; await writeFile(fresh); applyFile(fresh); setMode(modeOf());})
     .catch(e=>{console.error(e); setMode("err");});}
 function save(n){
-  if(!FH){setMode("nofile");render();return;}
+  if(!FH){setMode("nofile");prioNote="Ouvrez d'abord un projet (ou la démonstration) : sans fichier de données, cette modification ne peut pas être enregistrée.";render();return;}
   const v=S[n]?JSON.parse(JSON.stringify(S[n])):null;
   wchain=wchain.then(async()=>{const fresh=await readFile(); fresh.suivi=fresh.suivi||{};
       if(v) fresh.suivi[n]=v; else delete fresh.suivi[n];
@@ -948,6 +1007,16 @@ document.getElementById("demoLoad").onclick=async()=>{
     render();
   }catch(err){prioNote="Démonstration indisponible : "+(err&&err.message||err);render();}
 };
+/* Bandeau « aucun projet ouvert » : il propose les deux seules actions utiles. */
+(function(){
+  const o=document.getElementById("noProjOpen"), dm=document.getElementById("noProjDemo");
+  if(o) o.onclick=()=>{
+    const b=window.showOpenFilePicker?document.getElementById("openFile")
+      :(document.getElementById("openLocal")||document.getElementById("roFile"));
+    if(b) b.click();
+  };
+  if(dm) dm.onclick=()=>{ const b=document.getElementById("demoLoad"); if(b) b.click(); };
+})();
 document.getElementById("saveName").onclick=()=>{const v=document.getElementById("userName").value.trim(); if(!v) return; ME=v; store.set("pilotage-nom",v); refreshSetup(); setMode(modeOf());};
 const HAS_FS=!!window.showOpenFilePicker;
 if(!HAS_FS){document.getElementById("openFile").hidden=true; document.getElementById("noApi").hidden=false;}
