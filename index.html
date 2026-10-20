@@ -44,6 +44,17 @@
 .maintabs button{border:0;border-bottom:2px solid transparent;border-radius:0;background:transparent;padding:10px 14px;font-weight:600;color:var(--muted)}
 .maintabs button[aria-selected=true]{color:var(--accent);border-bottom-color:var(--accent)}
 .maintabs button:hover{color:var(--fg)}
+/* Vue « Toutes les tâches » : liste complète, tous statuts et toutes échéances */
+#view-taches{display:flex;flex-direction:column;gap:14px}
+.allbar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:10px 12px}
+.allbar select{font:inherit;font-size:13px;border:1px solid var(--line);background:var(--surface);color:var(--fg);border-radius:6px;padding:5px 8px;max-width:220px;min-width:0}
+.allbar #allQ{flex:1 1 200px;min-width:150px}
+.allbar .spacer{flex:1}
+.allgrp>h2{margin:4px 0 0}
+#allList .group{gap:6px}
+details.allgrp>summary{cursor:pointer;font-size:13px;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);font-weight:700;display:flex;gap:8px;align-items:center;padding:6px 0}
+details.allgrp>summary .n,.allgrp>h2 .n{font-family:var(--f-mono);background:var(--surface-2);color:var(--fg);border-radius:4px;padding:0 6px;font-size:12px;letter-spacing:0}
+.allfilters-note{font-size:12px;color:var(--muted)}
 .by{font-size:11px;font-weight:600;color:var(--accent);white-space:nowrap}
 .chip.ext{background:var(--accent-soft);color:var(--accent)}
 .guestbar{background:var(--accent-soft);color:var(--fg);border-radius:8px;padding:10px 14px;font-size:13px;display:flex;flex-direction:column;gap:8px}
@@ -210,6 +221,7 @@ textarea#recap{width:100%;font-family:var(--f-mono);font-size:12px;background:va
   </div>
   <nav class="maintabs" role="tablist" aria-label="Vues">
     <button role="tab" data-view="jour" aria-selected="true">Ma journée</button>
+    <button role="tab" data-view="taches" aria-selected="false">Toutes les tâches</button>
     <button role="tab" data-view="bilan" aria-selected="false">Bilan</button>
     <button role="tab" data-view="copil" aria-selected="false">Kit COPIL</button>
     <button role="tab" data-view="reunion" aria-selected="false">Réunion</button>
@@ -217,6 +229,31 @@ textarea#recap{width:100%;font-family:var(--f-mono);font-size:12px;background:va
     <button role="tab" data-view="risques" aria-selected="false">Risques &amp; décisions</button>
   </nav>
   <div id="view-bilan" hidden><iframe id="bilanFrame" title="Bilans, kit COPIL, réunions, relances et registre des risques" allow="clipboard-write" style="width:100%;border:0;min-height:900px;display:block;background:transparent"></iframe></div>
+  <div id="view-taches" hidden>
+    <div class="summary" id="allSummary"></div>
+    <div class="allbar">
+      <input type="search" id="allQ" placeholder="Rechercher : intitulé, lot, responsable, commentaire…" aria-label="Rechercher dans toutes les tâches">
+      <select id="allStatut" aria-label="Filtrer par statut">
+        <option value="tous">Tous les statuts</option>
+        <option value="À faire">À faire</option>
+        <option value="En cours">En cours</option>
+        <option value="Bloqué">Bloqué</option>
+        <option value="Terminé">Terminées</option>
+        <option value="Annulé">Annulées</option>
+      </select>
+      <select id="allLot" aria-label="Filtrer par lot"><option value="tous">Tous les lots</option></select>
+      <select id="allResp" aria-label="Filtrer par responsable"><option value="tous">Tous les responsables</option></select>
+      <select id="allTri" aria-label="Trier la liste">
+        <option value="echeance">Tri : échéance</option>
+        <option value="lot">Tri : lot</option>
+        <option value="resp">Tri : responsable</option>
+        <option value="titre">Tri : intitulé</option>
+        <option value="numero">Tri : numéro</option>
+      </select>
+      <button class="primary" id="allNew" title="Créer une tâche depuis « Ma journée »">+ Nouvelle tâche</button>
+    </div>
+    <div id="allList"></div>
+  </div>
   <div id="view-jour" style="display:flex;flex-direction:column;gap:18px">
   <div class="week" id="week"></div>
   <div class="summary" id="summary"></div>
@@ -292,6 +329,7 @@ textarea#recap{width:100%;font-family:var(--f-mono);font-size:12px;background:va
   <details class="backlog"><summary>Mode d'emploi ▾</summary><div class="empty" style="line-height:1.6">
     <b>Démarrer :</b> saisir son nom, puis « Ouvrir un projet existant » (le fichier .json du dossier partagé) ou « Créer un nouveau projet ». <b>Edge ou Chrome</b> enregistrent directement dans le fichier .json partagé ; avec <b>Firefox, Safari ou un mobile</b>, les données restent dans le navigateur et s'exportent en .json (boutons en bas de page).<br>
     <b>Tâches :</b> « + Nouvelle tâche » pour ajouter ; cocher = terminée ; « Modifier » pour l'échéance, le rôle, le responsable, le statut ; « Annulé » la retire (rétablissable en bas de page).<br>
+    <b>Toutes les tâches :</b> la liste complète du projet, toutes échéances et tous statuts confondus, groupée par urgence ; recherche et filtres par statut, lot et responsable, tri par échéance, lot, responsable ou intitulé. Les tâches terminées et annulées sont repliées en bas de page.<br>
     <b>Actions de réunion :</b> « Coller les actions d'une réunion » : copier la liste d'actions d'une note (Granola, Teams, mail), la coller, vérifier l'aperçu (responsable, échéance) puis créer les tâches en un clic.<br>
     <b>Bilan :</b> semaine, mois ou période libre ; synthèse rédigée, « ce qui a changé » (dont les échéances décalées), avancement par lot, charge par personne — à copier dans un mail ou Teams, imprimer en PDF ou télécharger.<br>
     <b>Kit COPIL :</b> 6 slides prêtes (avancement, faits marquants, vigilance, décisions à prendre, prochaines étapes), modifiables et imprimables en A4 paysage.<br>
@@ -412,7 +450,7 @@ setInterval(async()=>{if(!FH) return; try{const f=await FH.getFile(); if(f.lastM
 const respOf=t=>{const m=(t.com||"").match(/Responsables?(?: pressentie?s?)?\s*:\s*([^.;\n]+)/i);return m?m[1].trim():""};
 const ORIG={};
 const numLabel=t=>"n°"+t.n;
-let TASKS=[], CANCELLED=[]; let openEdit=null; let prioNote=null, noteMsg="", noteUntil=0; const edDraft={};
+let TASKS=[], CANCELLED=[], ALLTASKS=[]; let openEdit=null; let prioNote=null, noteMsg="", noteUntil=0; const edDraft={};
 function eff(t){const m=(S[t.n]||{}).mod; const x=m?{...t,...m}:{...t}; if(x.resp===undefined) x.resp=respOf(t); x._mod=!!(m&&Object.keys(m).length); return x;}
 function refreshTasks(){
   DATA.tasks.forEach(t=>ORIG[t.n]=t);
@@ -420,6 +458,7 @@ function refreshTasks(){
   created.forEach(t=>ORIG[t.n]=t);
   XT.forEach(t=>ORIG[t.n]=t);
   const ALL=[...DATA.tasks,...created,...XT].map(eff);
+  ALLTASKS=ALL;
   TASKS=ALL.filter(t=>t.st!=="Annulé"&&t.st!=="Terminé"); CANCELLED=ALL.filter(t=>t.st==="Annulé");
 }
 const OWNER=true; let XT=[], XC={};
@@ -497,9 +536,10 @@ function dueLabel(t,c){
   if(c.g==="soon") return `<span class="due soon">${fr(t.fin)}<small>J-${c.k}</small></span>`;
   return `<span class="due none">${t.deb&&t.deb!==t.fin?fr(t.deb)+" → ":""}${fr(t.fin)}</span>`;
 }
-function taskHTML(t,c,px="l",extra=""){
+function taskHTML(t,c,px="l",extra="",opts={}){
   const key=px+t.n;
   const fait=isDone(t.n), st=S[t.n]||{}, com=st.com||[];
+  const pinOn=(pins[sel]||[]).includes(t.n);
   const allc=[...com.map((c,i)=>({...c,_i:i,_own:true})),...(XC[t.n]||[])].sort((a,b)=>(a.d+(a.h||"")).localeCompare(b.d+(b.h||"")));
   const coms=`<div class="coms">${allc.map(c=>{
     const canDel=c._own?(OWNER&&(!c.by||c.by===ME)):(c.by===ME);
@@ -511,7 +551,7 @@ function taskHTML(t,c,px="l",extra=""){
     ${openCom!==key&&openEdit!==key?`<div class="actsrow"><button class="linkbtn" data-opencom="${key}">+ Ajouter un commentaire</button>${OWNER?`<button class="linkbtn" data-openedit="${key}">Modifier échéance, rôle, responsable, statut</button>`:""}</div>`:""}</div>`;
   const notes=[t.com?`<b>Commentaire :</b> ${esc(t.com)}`:"",t.notes?`<b>Notes de suivi :</b> ${esc(t.notes)}`:""].filter(Boolean).join("\n\n");
   return `<div class="task ${fait?"done":""}">
-    <input type="checkbox" id="cb-${key}" data-n="${t.n}" ${fait?"checked":""} ${OWNER?"":"disabled"} aria-label="Marquer la tâche ${t.n} comme terminée">
+    <input type="checkbox" id="cb-${key}" data-n="${t.n}" data-doneon="${opts.doneOn||sel}" ${fait?"checked":""} ${OWNER?"":"disabled"} aria-label="Marquer la tâche ${t.n} comme terminée">
     <div style="min-width:0"><label for="cb-${key}" class="tt">${esc(t.t)}</label>
       <div class="tm"><span class="num">${numLabel(t)}</span><span>${esc(t.lot||"")}</span>
         <span class="chip ${t.role==="Pilote"?"pilote":"consulte"}">${esc(t.role||"")}</span>
@@ -520,7 +560,7 @@ function taskHTML(t,c,px="l",extra=""){
         ${t._ext?`<span class="chip ext" title="${esc(whoTitle(t.by))}">ajoutée par ${esc(who(t.by))}</span>`:""}
         ${t._ext&&t.by===ME&&!OWNER?`<button class="linkbtn" data-withdraw="${esc(t._xid)}" data-wn="${t.n}">Retirer ma proposition</button>`:""}
         ${t._mod?`<span class="chip mod" title="Modifié ici, à reporter dans l'Excel">modifié</span>`:""}</div>${extra}</div>
-    <div class="right">${dueLabel(t,c)}<button class="star" data-pin="${t.n}" aria-pressed="${(pins[sel]||[]).includes(t.n)}" title="Épingler dans les priorités du jour" aria-label="Épingler la tâche ${t.n}">${(pins[sel]||[]).includes(t.n)?"★":"☆"}</button></div>
+    <div class="right">${dueLabel(t,c)}${opts.pin===false?"":`<button class="star" data-pin="${t.n}" aria-pressed="${pinOn}" title="Épingler dans les priorités du jour" aria-label="Épingler la tâche ${t.n}">${pinOn?"★":"☆"}</button>`}</div>
     ${notes?`<details class="notes"><summary>Notes du fichier ▸</summary><p>${notes}</p></details>`:""}
     ${coms}
   </div>`;
@@ -563,7 +603,7 @@ function sortT(a,b){
 function render(){
   refreshTasks();
   const d=parse(sel);
-  document.getElementById("title").textContent=`${JOURS[d.getDay()][0].toUpperCase()+JOURS[d.getDay()].slice(1)} ${d.getDate()} ${MOIS[d.getMonth()]} ${d.getFullYear()}`;
+  document.getElementById("title").textContent=VIEW==="taches"?"Toutes les tâches":`${JOURS[d.getDay()][0].toUpperCase()+JOURS[d.getDay()].slice(1)} ${d.getDate()} ${MOIS[d.getMonth()]} ${d.getFullYear()}`;
   document.getElementById("pick").value=sel;
   // semaine
   const dow=(d.getDay()+6)%7, mon=addD(d,-dow);
@@ -643,16 +683,126 @@ function render(){
     pins[sel]=[...L]; store.set("pin-"+(PROJ.nom||"x"),pins); render();
   });
 
-  document.querySelectorAll('input[type=checkbox][data-n]').forEach(cb=>cb.onchange=()=>{
-    const n=+cb.dataset.n, r=rec(n); r.fait=cb.checked; r.faitLe=cb.checked?sel:null;
-    save(n); render();
-  });
+  bindDoneChecks();
   const D=Object.values(S).filter(r=>r.fait&&r.faitLe===sel).map(r=>r.n);
   const C=Object.values(S).reduce((k,r)=>k+(r.com||[]).filter(c=>c.d===sel).length,0);
   document.getElementById("doneInfo").textContent=(D.length?`${D.length} tâche${D.length>1?"s":""} terminée${D.length>1?"s":""} ce jour (n°${D.join(", n°")})`:"Aucune tâche terminée ce jour")+(C?` · ${C} commentaire${C>1?"s":""} ajouté${C>1?"s":""}`:"")+".";
   if(openCom!=null){const ta=document.getElementById("ta-"+openCom); if(ta&&document.activeElement!==ta){ta.focus();ta.setSelectionRange(ta.value.length,ta.value.length)}}
   document.getElementById("fPilote").setAttribute("aria-pressed",filt.pilote);
   document.getElementById("fEncours").setAttribute("aria-pressed",filt.encours);
+  if(VIEW==="taches") renderAllTasks();
+}
+
+/* ---------- vue « Toutes les tâches » : liste complète, sans filtre de date ---------- */
+let allF=Object.assign({q:"",statut:"tous",lot:"tous",resp:"tous",tri:"echeance"},
+  store.get("pilotage-taches-filtre",{}));
+const saveAllF=()=>store.set("pilotage-taches-filtre",allF);
+/* statut réellement affiché : la case cochée prime sur le statut du fichier */
+function statKey(t){
+  if(isDone(t.n)) return "Terminé";
+  if(t.st==="Annulé") return "Annulé";
+  if(t.st==="Terminé") return "Terminé";
+  return t.st||"À faire";
+}
+function allBucket(t,today){
+  if(t.st==="Annulé") return "cancelled";
+  if(statKey(t)==="Terminé") return "done";
+  const g=classify(t,today).g;
+  if(g==="late") return "late";
+  if(g==="today") return "today";
+  if(g==="soon") return "soon";
+  if(g==="later"||g==="active") return "later";
+  return "nodate";
+}
+const ALL_GROUPS=[
+  ["late","En retard","g-late"],["today","Échéance aujourd'hui","g-today"],
+  ["soon","Dans les 7 jours",""],["later","Plus tard",""],["nodate","Sans échéance",""]
+];
+function allMatch(t){
+  const st=allF.statut;
+  if(st!=="tous"&&statKey(t)!==st) return false;
+  if(allF.lot!=="tous"&&(t.lot||"")!==allF.lot) return false;
+  if(allF.resp!=="tous"&&(t.resp||"")!==allF.resp) return false;
+  const q=allF.q.trim().toLowerCase();
+  if(q){
+    const hay=[t.t,t.lot,t.resp,t.com,t.notes,t.st,t.role].join(" ").toLowerCase();
+    if(!q.split(/\s+/).every(w=>hay.includes(w))) return false;
+  }
+  return true;
+}
+function allSort(a,b){
+  const fin=(x,y)=>(x.fin||"9999").localeCompare(y.fin||"9999");
+  if(allF.tri==="lot") return (a.lot||"~").localeCompare(b.lot||"~","fr")||fin(a,b)||a.n-b.n;
+  if(allF.tri==="resp") return (a.resp||"~").localeCompare(b.resp||"~","fr")||fin(a,b)||a.n-b.n;
+  if(allF.tri==="titre") return a.t.localeCompare(b.t,"fr")||fin(a,b);
+  if(allF.tri==="numero") return a.n-b.n;
+  return fin(a,b)||a.n-b.n;
+}
+function fillAllFilters(){
+  const lots=[...new Set(ALLTASKS.map(t=>t.lot).filter(Boolean))].sort((a,b)=>a.localeCompare(b,"fr"));
+  const resps=[...new Set(ALLTASKS.map(t=>(t.resp||"").trim()).filter(Boolean))].sort((a,b)=>a.localeCompare(b,"fr"));
+  if(allF.lot!=="tous"&&!lots.includes(allF.lot)) allF.lot="tous";
+  if(allF.resp!=="tous"&&!resps.includes(allF.resp)) allF.resp="tous";
+  const opt=(v,l,cur)=>`<option value="tous">${l}</option>`+
+    v.map(x=>`<option value="${esc(x)}"${x===cur?" selected":""}>${esc(x)}</option>`).join("");
+  document.getElementById("allLot").innerHTML=opt(lots,"Tous les lots",allF.lot);
+  document.getElementById("allResp").innerHTML=opt(resps,"Tous les responsables",allF.resp);
+  document.getElementById("allStatut").value=allF.statut;
+  document.getElementById("allTri").value=allF.tri;
+}
+function renderAllTasks(){
+  const today=iso(new Date());
+  fillAllFilters();
+  const shown=ALLTASKS.filter(allMatch).sort(allSort);
+  const stat=k=>ALLTASKS.filter(t=>statKey(t)===k).length;
+  const act=t=>!isDone(t.n)&&t.st!=="Annulé"&&t.st!=="Terminé";
+  const late=ALLTASKS.filter(t=>act(t)&&classify(t,today).g==="late").length;
+  const tod=ALLTASKS.filter(t=>act(t)&&classify(t,today).g==="today").length;
+  document.getElementById("allSummary").innerHTML=
+    `<span><span class="k mono">${ALLTASKS.length}</span><span class="lbl">tâche${ALLTASKS.length>1?"s":""} au total</span></span>
+     <span><span class="k late mono">${late}</span><span class="lbl">en retard</span></span>
+     <span><span class="k soon mono">${tod}</span><span class="lbl">échéance aujourd'hui</span></span>
+     <span><span class="k mono">${stat("Terminé")}</span><span class="lbl">terminées</span></span>
+     <span><span class="k mono">${stat("Annulé")}</span><span class="lbl">annulées</span></span>
+     <span class="allfilters-note">${shown.length} affichée${shown.length>1?"s":""}</span>`;
+  if(!shown.length){
+    document.getElementById("allList").innerHTML=`<div class="empty">${ALLTASKS.length?"Aucune tâche ne correspond à ces filtres.":"Aucune tâche pour l'instant : créez-en une depuis « Ma journée » ou ouvrez un projet."}</div>`;
+    return;
+  }
+  const buckets={};
+  shown.forEach(t=>{const b=allBucket(t,today);(buckets[b]=buckets[b]||[]).push(t)});
+  const rows=L=>L.map(t=>taskHTML(t,classify(t,today),"a","",{pin:false,doneOn:today})).join("");
+  let html="";
+  ALL_GROUPS.forEach(([g,lab,cls])=>{
+    const L=buckets[g]||[]; if(!L.length) return;
+    html+=`<section class="allgrp"><h2>${lab} <span class="n">${L.length}</span></h2><div class="group ${cls}">${rows(L)}</div></section>`;
+  });
+  [["done","Terminées"],["cancelled","Annulées"]].forEach(([g,lab])=>{
+    const L=buckets[g]||[]; if(!L.length) return;
+    const open=allF.statut===(g==="done"?"Terminé":"Annulé");
+    html+=`<details class="allgrp backlog"${open?" open":""}><summary>${lab} <span class="n">${L.length}</span></summary><div class="group">${rows(L)}</div></details>`;
+  });
+  document.getElementById("allList").innerHTML=html;
+  bindDoneChecks(document.getElementById("allList"));
+}
+document.getElementById("allQ").value=allF.q;
+document.getElementById("allQ").oninput=e=>{allF.q=e.target.value;saveAllF();renderAllTasks()};
+document.getElementById("allStatut").onchange=e=>{allF.statut=e.target.value;saveAllF();renderAllTasks()};
+document.getElementById("allLot").onchange=e=>{allF.lot=e.target.value;saveAllF();renderAllTasks()};
+document.getElementById("allResp").onchange=e=>{allF.resp=e.target.value;saveAllF();renderAllTasks()};
+document.getElementById("allTri").onchange=e=>{allF.tri=e.target.value;saveAllF();renderAllTasks()};
+document.getElementById("allNew").onclick=()=>{
+  setView("jour");
+  const nf=document.getElementById("newForm");
+  nf.hidden=false;
+  document.getElementById("nt-fin").value=sel;
+  document.getElementById("nt-t").focus();
+};
+function bindDoneChecks(root){
+  (root||document).querySelectorAll('input[type=checkbox][data-n]').forEach(cb=>cb.onchange=()=>{
+    const n=+cb.dataset.n, r=rec(n); r.fait=cb.checked; r.faitLe=cb.checked?(cb.dataset.doneon||sel):null;
+    save(n); render();
+  });
 }
 function recapText(){
   const find=n=>TASKS.find(t=>t.n===n)||DATA.tasks.find(t=>t.n===n);
@@ -933,9 +1083,12 @@ function sendBilan(){ if(!BREADY) return;
 function setView(v){ VIEW=v;
   document.querySelectorAll(".maintabs button").forEach(b=>b.setAttribute("aria-selected",String(b.dataset.view===v)));
   document.getElementById("view-jour").hidden=v!=="jour"; document.getElementById("view-jour").style.display=v==="jour"?"flex":"none";
-  document.getElementById("view-bilan").hidden=v==="jour";
+  const vt=document.getElementById("view-taches"); vt.hidden=v!=="taches"; vt.style.display=v==="taches"?"flex":"none";
+  document.getElementById("view-bilan").hidden=v==="jour"||v==="taches";
   document.querySelector(".nav").style.visibility=v==="jour"?"visible":"hidden";
-  if(v!=="jour"){ if(!BF.srcdoc) BF.srcdoc=BILAN_SRC; else if(BREADY) BF.contentWindow.postMessage({type:"tab",tab:v},"*"); }
+  if(v==="taches"){ document.getElementById("title").textContent="Toutes les tâches"; renderAllTasks(); }
+  else if(v==="jour") render();
+  else { if(!BF.srcdoc) BF.srcdoc=BILAN_SRC; else if(BREADY) BF.contentWindow.postMessage({type:"tab",tab:v},"*"); }
   try{store.set("pilotage-vue",v)}catch(e){} }
 document.querySelectorAll(".maintabs button").forEach(b=>b.onclick=()=>setView(b.dataset.view));
 
