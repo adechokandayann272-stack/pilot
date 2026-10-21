@@ -3,7 +3,7 @@
    le serveur est donc visible dès le rechargement suivant (pas de page figée sur
    une ancienne version), tout en gardant l'application utilisable hors ligne. */
 
-const CACHE = "poste-pilotage-v2";
+const CACHE = "poste-pilotage-v5";
 const CORE = [
   "./",
   "./index.html",
@@ -32,7 +32,7 @@ self.addEventListener("fetch", event => {
   const req = event.request;
   if (req.method !== "GET") return;
   const url = new URL(req.url);
-  if (url.origin !== self.location.origin) return;
+  if (url.origin !== self.location.origin || url.pathname.startsWith("/api/")) return;
 
   event.respondWith(
     fetch(req)
