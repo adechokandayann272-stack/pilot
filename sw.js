@@ -3,7 +3,7 @@
    le serveur est donc visible dès le rechargement suivant (pas de page figée sur
    une ancienne version), tout en gardant l'application utilisable hors ligne. */
 
-const CACHE = "poste-pilotage-v4";
+const CACHE = "poste-pilotage-v5";
 const CORE = [
   "./",
   "./index.html",

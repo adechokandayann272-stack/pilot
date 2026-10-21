@@ -112,8 +112,8 @@
 .maintabs button[aria-selected=true]{color:var(--accent);border-bottom-color:var(--accent)}
 .maintabs button:hover{color:var(--fg)}
 /* ===================== assistant IA ===================== */
-#view-ia,#view-notion{display:flex;flex-direction:column;gap:14px}
-.ai-card,.notion-card{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:14px 16px}
+#view-ia{display:flex;flex-direction:column;gap:14px}
+.ai-card{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:14px 16px}
 .notion-state{font-size:12.5px;color:var(--muted)}
 .notion-state.ok{color:var(--ok)} .notion-state.warn{color:var(--soon)} .notion-state.error{color:var(--late)}
 .notion-result{font-size:13px;line-height:1.5}
@@ -122,8 +122,14 @@
 .notion-steps{margin-top:12px}
 .notion-steps ol{margin:8px 0 0;padding-left:22px;font-size:13px;line-height:1.65}
 .notion-code{font-family:var(--f-mono);font-size:12px;background:var(--surface-2);padding:2px 5px;border-radius:4px}
+.notion-settings-form{display:grid;gap:9px}
+.notion-settings-form label{display:flex;flex-direction:column;gap:4px;font-size:12px;font-weight:600;color:var(--muted)}
+.notion-settings-form input{font:inherit;font-size:13px;border:1px solid var(--line);border-radius:6px;background:var(--surface);color:var(--fg);padding:7px 9px;min-width:0;width:100%}
+.notion-settings-form input:disabled{opacity:.65}
+.notion-settings-sync{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.notion-settings-sync #notionProjectInfo{flex:1 1 240px}
 .ai-heading{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;flex-wrap:wrap}
-.ai-heading h2,.ai-card h2,.notion-card h2{margin:0;font-size:17px}
+.ai-heading h2,.ai-card h2{margin:0;font-size:17px}
 .ai-heading p,.ai-help{margin:4px 0 0;color:var(--muted);font-size:12.5px;line-height:1.5}
 .ai-privacy{background:var(--soon-soft);border:1px solid var(--soon);border-radius:8px;padding:10px 12px;font-size:12.5px;line-height:1.55}
 .ai-privacy b{color:var(--soon)}
@@ -442,7 +448,6 @@ textarea#recap{width:100%;font-family:var(--f-mono);font-size:12px;background:va
     <button role="tab" data-view="jour" aria-selected="true">Ma journée</button>
     <button role="tab" data-view="taches" aria-selected="false">Toutes les tâches</button>
     <button role="tab" data-view="ia" aria-selected="false">Assistant IA</button>
-    <button role="tab" data-view="notion" aria-selected="false">Notion</button>
   </nav>
   <div id="view-taches" hidden>
     <div class="summary" id="allSummary"></div>
@@ -517,52 +522,8 @@ textarea#recap{width:100%;font-family:var(--f-mono);font-size:12px;background:va
     </section>
   </section>
 
-  <section id="view-notion" hidden aria-labelledby="notionTitle">
-    <div class="ai-heading">
-      <div><h2 id="notionTitle">Synchronisation Notion</h2><p>Publiez une copie lisible et complète du projet dans une page Notion dédiée.</p></div>
-    </div>
-    <div class="ai-privacy" role="note">
-      <b>Connexion sécurisée :</b> le token Notion est envoyé uniquement au petit serveur local, puis conservé en mémoire côté serveur. Il n'est jamais écrit dans le fichier projet ni dans le stockage du navigateur. La page Notion créée est mise à jour à chaque synchronisation ; son contenu est remplacé par l'état actuel du projet.
-    </div>
-
-    <section class="notion-card" aria-labelledby="notionConnectTitle">
-      <h2 id="notionConnectTitle">Connecter l'API Notion</h2>
-      <p class="ai-help">Pour protéger votre token, la synchronisation passe par un pont local. Lancez <code class="notion-code">python3 notion_bridge.py</code>, puis ouvrez l'application à l'adresse affichée par le serveur. Créez une intégration interne dans Notion et partagez avec elle la page de destination.</p>
-      <form id="notionConnectForm">
-        <div class="ai-config-grid">
-          <label>Token de l'intégration<input id="notionToken" type="password" autocomplete="new-password" spellcheck="false" placeholder="secret_… ou ntn_…" required></label>
-          <label>ID ou URL de la page Notion de destination<input id="notionParentPage" type="text" autocomplete="off" placeholder="ID de page ou URL Notion" required></label>
-        </div>
-        <div class="notion-actions">
-          <button type="submit" class="primary" id="notionConnect">Connecter</button>
-          <button type="button" id="notionDisconnect">Déconnecter</button>
-          <button type="button" id="notionTest" disabled>Tester la connexion</button>
-          <span id="notionState" class="notion-state" role="status" aria-live="polite">Recherche du pont Notion…</span>
-        </div>
-      </form>
-      <details class="backlog notion-steps">
-        <summary>Comment préparer Notion ? ▾</summary>
-        <ol>
-          <li>Dans Notion, créez une intégration interne et copiez son token.</li>
-          <li>Créez une page qui servira de dossier de destination, puis partagez-la avec cette intégration.</li>
-          <li>Lancez <code class="notion-code">python3 notion_bridge.py</code> dans le dossier de l'application et ouvrez <code class="notion-code">http://127.0.0.1:8765</code>.</li>
-          <li>Collez le token et l'URL (ou l'ID) de la page, puis cliquez sur « Connecter ».</li>
-        </ol>
-      </details>
-    </section>
-
-    <section class="notion-card" aria-labelledby="notionSyncTitle">
-      <div class="ai-heading">
-        <div><h2 id="notionSyncTitle">Contenu synchronisé</h2><div id="notionProjectInfo" class="ai-project"></div></div>
-        <button type="button" id="notionSync" class="primary" disabled>Synchroniser maintenant</button>
-      </div>
-      <p class="ai-help">La page de projet contient les tâches de tous les statuts, leurs échéances, rôles, responsables, commentaires et historique, l'agenda, ainsi qu'une copie JSON complète des données source. Les tâches terminées et annulées sont incluses.</p>
-      <div id="notionResult" class="notion-result" role="status" aria-live="polite" hidden></div>
-    </section>
-  </section>
-
   <button id="settingsBtn" class="fab-settings" aria-haspopup="dialog" aria-controls="settingsModal" aria-expanded="false"
-          aria-label="Réglages" title="Réglages : thème, police, taille, densité, accessibilité">
+          aria-label="Réglages" title="Réglages : apparence, comportement et connexion Notion">
     <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" focusable="false">
       <path fill="currentColor" d="M12 8.4a3.6 3.6 0 1 0 0 7.2 3.6 3.6 0 0 0 0-7.2Zm0 5.6a2 2 0 1 1 0-4 2 2 0 0 1 0 4Z"/>
       <path fill="currentColor" d="M20.3 13.2a8.6 8.6 0 0 0 0-2.4l2-1.5-2-3.4-2.3.9a8.4 8.4 0 0 0-2.1-1.2L15.5 3h-4l-.4 2.6a8.4 8.4 0 0 0-2.1 1.2l-2.3-.9-2 3.4 2 1.5a8.6 8.6 0 0 0 0 2.4l-2 1.5 2 3.4 2.3-.9a8.4 8.4 0 0 0 2.1 1.2l.4 2.6h4l.4-2.6a8.4 8.4 0 0 0 2.1-1.2l2.3.9 2-3.4-2-1.5Zm-1.8 3.1-1.6-.6-.6.5a6.7 6.7 0 0 1-1.8 1l-.7.3-.3 1.9h-1.6l-.3-1.9-.7-.3a6.7 6.7 0 0 1-1.8-1l-.6-.5-1.6.6-.8-1.4 1.4-1.1-.1-.8a6.9 6.9 0 0 1 0-1.6l.1-.8L6.7 8.5l.8-1.4 1.6.6.6-.5a6.7 6.7 0 0 1 1.8-1l.7-.3.3-1.9h1.6l.3 1.9.7.3a6.7 6.7 0 0 1 1.8 1l.6.5 1.6-.6.8 1.4-1.4 1.1.1.8a6.9 6.9 0 0 1 0 1.6l-.1.8 1.4 1.1-.8 1.4Z"/>
@@ -574,7 +535,7 @@ textarea#recap{width:100%;font-family:var(--f-mono);font-size:12px;background:va
       <div class="modal-head">
         <div>
           <h2 id="settingsTitle">Réglages</h2>
-          <p>Ces préférences sont conservées dans ce navigateur uniquement : elles ne modifient pas le fichier du projet partagé avec l'équipe.</p>
+          <p>Les réglages d'apparence et de comportement restent dans ce navigateur. La connexion Notion est conservée en mémoire par le pont local et ne modifie pas le fichier du projet partagé.</p>
         </div>
         <button class="modal-close" id="settingsClose" aria-label="Fermer les réglages">×</button>
       </div>
@@ -647,6 +608,37 @@ textarea#recap{width:100%;font-family:var(--f-mono);font-size:12px;background:va
         </div>
         <p class="set-hint">Le rappel s'affiche en haut de « Ma journée » quand aucune copie n'a été téléchargée depuis ce délai.</p>
       </div>
+
+      <section class="set-group" aria-labelledby="settingsNotionTitle">
+        <span class="set-label" id="settingsNotionTitle">Connexion Notion</span>
+        <p class="set-hint">Connectez une intégration Notion facultative pour envoyer le projet ouvert vers une page dédiée. Le token reste en mémoire sur le pont local, jamais dans le fichier projet ou le stockage du navigateur.</p>
+        <p class="set-hint">Lancez <code class="notion-code">python3 notion_bridge.py</code> puis ouvrez l'application depuis l'adresse locale affichée.</p>
+        <form id="notionConnectForm" class="notion-settings-form">
+          <label>Token de l'intégration<input id="notionToken" type="password" autocomplete="new-password" spellcheck="false" placeholder="secret_… ou ntn_…" required></label>
+          <label>ID ou URL de la page Notion de destination<input id="notionParentPage" type="text" autocomplete="off" placeholder="ID de page ou URL Notion" required></label>
+          <div class="notion-actions">
+            <button type="submit" class="primary" id="notionConnect">Connecter</button>
+            <button type="button" id="notionDisconnect">Déconnecter</button>
+            <button type="button" id="notionTest" disabled>Tester</button>
+          </div>
+        </form>
+        <span id="notionState" class="notion-state" role="status" aria-live="polite">Recherche du pont Notion…</span>
+        <div class="notion-settings-sync">
+          <div id="notionProjectInfo" class="set-hint">Ouvrez un projet pour le synchroniser.</div>
+          <button type="button" id="notionSync" class="primary" disabled>Synchroniser maintenant</button>
+        </div>
+        <p class="set-hint">La synchronisation comprend toutes les tâches (y compris terminées et annulées), les échéances, commentaires, historiques, l'agenda et une copie JSON complète. Elle ne démarre qu'au clic sur le bouton.</p>
+        <div id="notionResult" class="notion-result" role="status" aria-live="polite" hidden></div>
+        <details class="backlog notion-steps">
+          <summary>Préparer une intégration Notion ▾</summary>
+          <ol>
+            <li>Dans Notion, créez une intégration interne et copiez son token.</li>
+            <li>Créez une page de destination puis partagez-la avec cette intégration.</li>
+            <li>Lancez <code class="notion-code">python3 notion_bridge.py</code> dans le dossier de l'application et ouvrez <code class="notion-code">http://127.0.0.1:8765</code>.</li>
+            <li>Collez le token et l'URL (ou l'ID) de la page ci-dessus, puis cliquez sur « Connecter ».</li>
+          </ol>
+        </details>
+      </section>
 
       <div class="modal-foot">
         <button type="button" id="setReset">Rétablir les réglages par défaut</button>
@@ -1026,7 +1018,7 @@ function render(){
   renderBackupNote();
   notionUpdateProjectMeta();
   const d=parse(sel);
-  document.getElementById("title").textContent=VIEW==="taches"?"Toutes les tâches":VIEW==="ia"?"Assistant IA":VIEW==="notion"?"Synchronisation Notion":`${JOURS[d.getDay()][0].toUpperCase()+JOURS[d.getDay()].slice(1)} ${d.getDate()} ${MOIS[d.getMonth()]} ${d.getFullYear()}`;
+  document.getElementById("title").textContent=VIEW==="taches"?"Toutes les tâches":VIEW==="ia"?"Assistant IA":`${JOURS[d.getDay()][0].toUpperCase()+JOURS[d.getDay()].slice(1)} ${d.getDate()} ${MOIS[d.getMonth()]} ${d.getFullYear()}`;
   document.getElementById("pick").value=sel;
   // semaine
   const dow=(d.getDay()+6)%7, mon=addD(d,-dow);
@@ -1585,7 +1577,7 @@ function bindSettings(){
   let lastFocus=null;
   const exp=v=>{const sb=document.getElementById("settingsBtn"); if(sb) sb.setAttribute("aria-expanded",String(v));};
   exp(false);
-  const open=()=>{lastFocus=document.activeElement; modal.hidden=false; exp(true); syncSettingsUI();
+  const open=()=>{lastFocus=document.activeElement; modal.hidden=false; exp(true); syncSettingsUI(); notionUpdateProjectMeta();
     const c=document.getElementById("settingsClose"); if(c) c.focus();};
   const close=()=>{modal.hidden=true; exp(false); if(lastFocus&&lastFocus.focus) try{lastFocus.focus()}catch(e){}};
 
@@ -1647,7 +1639,7 @@ function backupDue(){
 function firstRunHint(){
   if(HAD_SETTINGS) return;
   const b=document.getElementById("settingsBtn");
-  if(b){ b.classList.add("primary"); b.title="Réglages — nouveau : choisissez le thème, la police, la taille du texte…"; }
+  if(b){ b.classList.add("primary"); b.title="Réglages — personnalisez l'affichage et configurez une connexion Notion facultative."; }
 }
 
 /* ===================== assistant IA =====================
@@ -1987,18 +1979,16 @@ function notionInitUI(){
 
 let VIEW="jour";
 function setView(v){
-  if(v!=="jour"&&v!=="taches"&&v!=="ia"&&v!=="notion") v="jour";
+  if(v!=="jour"&&v!=="taches"&&v!=="ia") v="jour";
   VIEW=v;
   document.querySelectorAll(".maintabs button").forEach(b=>b.setAttribute("aria-selected",String(b.dataset.view===v)));
-  const vj=document.getElementById("view-jour"), vt=document.getElementById("view-taches"), via=document.getElementById("view-ia"), vn=document.getElementById("view-notion");
+  const vj=document.getElementById("view-jour"), vt=document.getElementById("view-taches"), via=document.getElementById("view-ia");
   vj.hidden=v!=="jour"; vj.style.display=v==="jour"?"flex":"none";
   vt.hidden=v!=="taches"; vt.style.display=v==="taches"?"flex":"none";
   via.hidden=v!=="ia"; via.style.display=v==="ia"?"flex":"none";
-  vn.hidden=v!=="notion"; vn.style.display=v==="notion"?"flex":"none";
   document.querySelector(".nav").style.visibility=v==="jour"?"visible":"hidden";
   if(v==="taches"){document.getElementById("title").textContent="Toutes les tâches";renderAllTasks();}
   else if(v==="ia"){document.getElementById("title").textContent="Assistant IA";aiUpdateProjectMeta();}
-  else if(v==="notion"){document.getElementById("title").textContent="Synchronisation Notion";notionUpdateProjectMeta();}
   else render();
   try{store.set("pilotage-vue",v)}catch(e){}
   try{store.set("pilotage-vue-date",sel)}catch(e){}

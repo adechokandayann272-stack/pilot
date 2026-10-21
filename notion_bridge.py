@@ -3,7 +3,7 @@
 
 The Notion integration secret is held only in this process (or read from the
 process environment); it is never written to the project JSON or browser storage.
-Run this script and open http://127.0.0.1:8765/ to use the optional Notion tab.
+Run this script and open http://127.0.0.1:8765/ to configure Notion in the app settings.
 """
 from __future__ import annotations
 
@@ -584,7 +584,7 @@ def main() -> None:
     server = ThreadingHTTPServer((args.host, args.port), BridgeHandler)
     server.allow_notion_credentials = local_only
     server.daemon_threads = True
-    status = "identifiants Notion présents (ils restent côté serveur)" if token and parent_id else "en attente de configuration Notion dans l'onglet Notion"
+    status = "identifiants Notion présents (ils restent côté serveur)" if token and parent_id else "en attente de configuration Notion dans les réglages"
     print(f"Poste de pilotage : http://{args.host}:{args.port}/ — {status}", flush=True)
     try:
         server.serve_forever()

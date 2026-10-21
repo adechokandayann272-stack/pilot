@@ -83,9 +83,10 @@ commentaires et historique, l'agenda, ainsi qu'un bloc JSON complet du fichier s
 est remplacée à chaque synchronisation : gardez-y uniquement les données gérées par l'application.
 
 Pour utiliser cette fonction, lancez `python3 notion_bridge.py` depuis le dossier du projet, puis
-ouvrez l'adresse locale affichée (par défaut `http://127.0.0.1:8765`). Dans l'onglet **Notion**,
-collez le token d'une intégration interne et l'ID ou l'URL d'une page Notion partagée avec cette
-intégration. Le pont local conserve le token uniquement en mémoire et l'efface à l'arrêt ; il
+ouvrez l'adresse locale affichée (par défaut `http://127.0.0.1:8765`). Ouvrez les **Réglages**
+(roue dentée), puis la section **Connexion Notion**. Collez le token d'une intégration interne et
+l'ID ou l'URL d'une page Notion partagée avec cette intégration. Le pont local conserve le token
+uniquement en mémoire et l'efface à l'arrêt ; il
 n'est jamais écrit dans le fichier projet ou dans le stockage du navigateur. La synchronisation
 vers Notion ne démarre qu'au clic sur **Synchroniser maintenant**.
 
