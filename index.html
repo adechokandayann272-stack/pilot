@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Poste de pilotage</title>
-<meta name="description" content="Poste de pilotage de projet : agenda, tâches priorisées et assistant IA.">
+<meta name="description" content="Poste de pilotage de projet : agenda, tâches priorisées, assistant IA et synchronisation Notion.">
 <meta name="color-scheme" content="light dark">
 <script>
 /* Préférences appliquées avant le premier rendu (évite le clignotement de thème).
@@ -112,10 +112,18 @@
 .maintabs button[aria-selected=true]{color:var(--accent);border-bottom-color:var(--accent)}
 .maintabs button:hover{color:var(--fg)}
 /* ===================== assistant IA ===================== */
-#view-ia{display:flex;flex-direction:column;gap:14px}
-.ai-card{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:14px 16px}
+#view-ia,#view-notion{display:flex;flex-direction:column;gap:14px}
+.ai-card,.notion-card{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:14px 16px}
+.notion-state{font-size:12.5px;color:var(--muted)}
+.notion-state.ok{color:var(--ok)} .notion-state.warn{color:var(--soon)} .notion-state.error{color:var(--late)}
+.notion-result{font-size:13px;line-height:1.5}
+.notion-result a{color:var(--accent);font-weight:600}
+.notion-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:12px}
+.notion-steps{margin-top:12px}
+.notion-steps ol{margin:8px 0 0;padding-left:22px;font-size:13px;line-height:1.65}
+.notion-code{font-family:var(--f-mono);font-size:12px;background:var(--surface-2);padding:2px 5px;border-radius:4px}
 .ai-heading{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;flex-wrap:wrap}
-.ai-heading h2,.ai-card h2{margin:0;font-size:17px}
+.ai-heading h2,.ai-card h2,.notion-card h2{margin:0;font-size:17px}
 .ai-heading p,.ai-help{margin:4px 0 0;color:var(--muted);font-size:12.5px;line-height:1.5}
 .ai-privacy{background:var(--soon-soft);border:1px solid var(--soon);border-radius:8px;padding:10px 12px;font-size:12.5px;line-height:1.55}
 .ai-privacy b{color:var(--soon)}
@@ -434,6 +442,7 @@ textarea#recap{width:100%;font-family:var(--f-mono);font-size:12px;background:va
     <button role="tab" data-view="jour" aria-selected="true">Ma journée</button>
     <button role="tab" data-view="taches" aria-selected="false">Toutes les tâches</button>
     <button role="tab" data-view="ia" aria-selected="false">Assistant IA</button>
+    <button role="tab" data-view="notion" aria-selected="false">Notion</button>
   </nav>
   <div id="view-taches" hidden>
     <div class="summary" id="allSummary"></div>
@@ -505,6 +514,50 @@ textarea#recap{width:100%;font-family:var(--f-mono);font-size:12px;background:va
         </div>
       </form>
       <div id="aiLoading" class="ai-loading" hidden>Réponse en cours…</div>
+    </section>
+  </section>
+
+  <section id="view-notion" hidden aria-labelledby="notionTitle">
+    <div class="ai-heading">
+      <div><h2 id="notionTitle">Synchronisation Notion</h2><p>Publiez une copie lisible et complète du projet dans une page Notion dédiée.</p></div>
+    </div>
+    <div class="ai-privacy" role="note">
+      <b>Connexion sécurisée :</b> le token Notion est envoyé uniquement au petit serveur local, puis conservé en mémoire côté serveur. Il n'est jamais écrit dans le fichier projet ni dans le stockage du navigateur. La page Notion créée est mise à jour à chaque synchronisation ; son contenu est remplacé par l'état actuel du projet.
+    </div>
+
+    <section class="notion-card" aria-labelledby="notionConnectTitle">
+      <h2 id="notionConnectTitle">Connecter l'API Notion</h2>
+      <p class="ai-help">Pour protéger votre token, la synchronisation passe par un pont local. Lancez <code class="notion-code">python3 notion_bridge.py</code>, puis ouvrez l'application à l'adresse affichée par le serveur. Créez une intégration interne dans Notion et partagez avec elle la page de destination.</p>
+      <form id="notionConnectForm">
+        <div class="ai-config-grid">
+          <label>Token de l'intégration<input id="notionToken" type="password" autocomplete="new-password" spellcheck="false" placeholder="secret_… ou ntn_…" required></label>
+          <label>ID ou URL de la page Notion de destination<input id="notionParentPage" type="text" autocomplete="off" placeholder="ID de page ou URL Notion" required></label>
+        </div>
+        <div class="notion-actions">
+          <button type="submit" class="primary" id="notionConnect">Connecter</button>
+          <button type="button" id="notionDisconnect">Déconnecter</button>
+          <button type="button" id="notionTest" disabled>Tester la connexion</button>
+          <span id="notionState" class="notion-state" role="status" aria-live="polite">Recherche du pont Notion…</span>
+        </div>
+      </form>
+      <details class="backlog notion-steps">
+        <summary>Comment préparer Notion ? ▾</summary>
+        <ol>
+          <li>Dans Notion, créez une intégration interne et copiez son token.</li>
+          <li>Créez une page qui servira de dossier de destination, puis partagez-la avec cette intégration.</li>
+          <li>Lancez <code class="notion-code">python3 notion_bridge.py</code> dans le dossier de l'application et ouvrez <code class="notion-code">http://127.0.0.1:8765</code>.</li>
+          <li>Collez le token et l'URL (ou l'ID) de la page, puis cliquez sur « Connecter ».</li>
+        </ol>
+      </details>
+    </section>
+
+    <section class="notion-card" aria-labelledby="notionSyncTitle">
+      <div class="ai-heading">
+        <div><h2 id="notionSyncTitle">Contenu synchronisé</h2><div id="notionProjectInfo" class="ai-project"></div></div>
+        <button type="button" id="notionSync" class="primary" disabled>Synchroniser maintenant</button>
+      </div>
+      <p class="ai-help">La page de projet contient les tâches de tous les statuts, leurs échéances, rôles, responsables, commentaires et historique, l'agenda, ainsi qu'une copie JSON complète des données source. Les tâches terminées et annulées sont incluses.</p>
+      <div id="notionResult" class="notion-result" role="status" aria-live="polite" hidden></div>
     </section>
   </section>
 
@@ -971,8 +1024,9 @@ function renderBackupNote(){
 function render(){
   refreshTasks();
   renderBackupNote();
+  notionUpdateProjectMeta();
   const d=parse(sel);
-  document.getElementById("title").textContent=VIEW==="taches"?"Toutes les tâches":VIEW==="ia"?"Assistant IA":`${JOURS[d.getDay()][0].toUpperCase()+JOURS[d.getDay()].slice(1)} ${d.getDate()} ${MOIS[d.getMonth()]} ${d.getFullYear()}`;
+  document.getElementById("title").textContent=VIEW==="taches"?"Toutes les tâches":VIEW==="ia"?"Assistant IA":VIEW==="notion"?"Synchronisation Notion":`${JOURS[d.getDay()][0].toUpperCase()+JOURS[d.getDay()].slice(1)} ${d.getDate()} ${MOIS[d.getMonth()]} ${d.getFullYear()}`;
   document.getElementById("pick").value=sel;
   // semaine
   const dow=(d.getDay()+6)%7, mon=addD(d,-dow);
@@ -1807,18 +1861,144 @@ async function aiSendQuestion(e){
   }
 }
 
+/* ===================== synchronisation Notion (pont local) ===================== */
+let NOTION_BRIDGE=false, NOTION_CONFIGURED=false, NOTION_CREDENTIALS_ALLOWED=false, NOTION_BUSY=false;
+async function notionRequest(path,method="GET",payload=null){
+  const headers={"Accept":"application/json"};
+  const options={method,headers,cache:"no-store",credentials:"same-origin"};
+  if(method!=="GET"){
+    headers["Content-Type"]="application/json"; headers["X-Pilotage-Request"]="1";
+    options.body=JSON.stringify(payload||{});
+  }
+  const response=await fetch(path,options), raw=await response.text(); let data={};
+  try{data=raw?JSON.parse(raw):{};}catch(e){}
+  if(!response.ok) throw new Error(data.error||`Le pont a répondu HTTP ${response.status}.`);
+  return data;
+}
+function notionSetStatus(text,kind=""){
+  const el=document.getElementById("notionState");
+  if(el){el.textContent=text;el.className="notion-state"+(kind?" "+kind:"");}
+}
+function notionUpdateControls(){
+  const ready=NOTION_BRIDGE&&NOTION_CONFIGURED&&!NOTION_BUSY;
+  const sync=document.getElementById("notionSync"), test=document.getElementById("notionTest");
+  const connect=document.getElementById("notionConnect"), disconnect=document.getElementById("notionDisconnect");
+  const token=document.getElementById("notionToken"), parent=document.getElementById("notionParentPage");
+  if(token) token.disabled=!NOTION_BRIDGE||!NOTION_CREDENTIALS_ALLOWED||NOTION_BUSY;
+  if(parent) parent.disabled=!NOTION_BRIDGE||!NOTION_CREDENTIALS_ALLOWED||NOTION_BUSY;
+  if(sync) sync.disabled=!ready||!LASTFILE;
+  if(test) test.disabled=!ready;
+  if(connect) connect.disabled=!NOTION_BRIDGE||!NOTION_CREDENTIALS_ALLOWED||NOTION_BUSY;
+  if(disconnect) disconnect.disabled=!NOTION_BRIDGE||!NOTION_CONFIGURED||NOTION_BUSY;
+  if(sync) sync.textContent=NOTION_BUSY?"Synchronisation…":"Synchroniser maintenant";
+}
+function notionUpdateProjectMeta(){
+  const el=document.getElementById("notionProjectInfo");
+  if(el){
+    if(!LASTFILE) el.textContent="Aucun projet ouvert — ouvrez un projet avant de synchroniser.";
+    else{
+      const tasks=(LASTFILE.base&&LASTFILE.base.tasks||[]).length+
+        Object.values(LASTFILE.suivi||{}).filter(r=>r&&r.cree&&r.task).length;
+      const events=(LASTFILE.base&&LASTFILE.base.events||[]).length;
+      el.textContent=`Projet « ${PROJ.nom||"Sans nom"} » · ${tasks} tâche${tasks>1?"s":""} · ${events} événement${events>1?"s":""} · toutes les tâches seront incluses.`;
+    }
+  }
+  notionUpdateControls();
+}
+async function notionLoadStatus(){
+  try{
+    const result=await notionRequest("api/notion/status");
+    NOTION_BRIDGE=!!result.bridge; NOTION_CONFIGURED=!!result.configured;
+    NOTION_CREDENTIALS_ALLOWED=!!result.credentialInputAllowed;
+    if(!NOTION_CREDENTIALS_ALLOWED) notionSetStatus("Pont joignable, mais la saisie de token est désactivée car il n'écoute pas uniquement sur cet ordinateur. Lancez-le localement sur 127.0.0.1.","warn");
+    else if(NOTION_CONFIGURED) notionSetStatus("Pont local actif et intégration configurée. Vous pouvez tester ou synchroniser.","ok");
+    else notionSetStatus("Pont local actif. Connectez un token d'intégration et une page Notion.","warn");
+  }catch(e){
+    NOTION_BRIDGE=false; NOTION_CONFIGURED=false; NOTION_CREDENTIALS_ALLOWED=false;
+    notionSetStatus("Pont local introuvable. Lancez « python3 notion_bridge.py » puis ouvrez l'application depuis son adresse.","warn");
+  }
+  notionUpdateControls();
+}
+function notionShowResult(message,url=""){
+  const el=document.getElementById("notionResult"); if(!el) return;
+  el.replaceChildren(); el.hidden=false;
+  const text=document.createElement("span"); text.textContent=message; el.appendChild(text);
+  if(url){
+    try{
+      const linkUrl=new URL(url);
+      if(linkUrl.protocol==="https:"&&/(^|\.)notion\.so$/i.test(linkUrl.hostname)){
+        const link=document.createElement("a"); link.href=linkUrl.href; link.target="_blank"; link.rel="noopener noreferrer";
+        link.textContent=" Ouvrir la page Notion"; el.appendChild(link);
+      }
+    }catch(e){}
+  }
+}
+function notionInitUI(){
+  const form=document.getElementById("notionConnectForm");
+  form.addEventListener("submit",async e=>{
+    e.preventDefault(); if(!NOTION_BRIDGE||!NOTION_CREDENTIALS_ALLOWED||NOTION_BUSY) return;
+    const token=document.getElementById("notionToken"), parent=document.getElementById("notionParentPage");
+    if(!token.value.trim()||!parent.value.trim()) return;
+    NOTION_BUSY=true; notionUpdateControls(); notionSetStatus("Vérification de l'accès Notion…");
+    try{
+      const result=await notionRequest("api/notion/connect","POST",{token:token.value.trim(),parentPageId:parent.value.trim()});
+      token.value=""; NOTION_CONFIGURED=true;
+      notionSetStatus(`Connexion vérifiée${result.parentTitle?` avec « ${result.parentTitle} »`:""}. Le token reste en mémoire sur ce serveur.`,"ok");
+      notionShowResult("Connexion Notion établie. Les données ne sont envoyées qu'au clic sur « Synchroniser maintenant ». ");
+    }catch(err){notionSetStatus(err.message||"Connexion Notion impossible.","error");}
+    finally{NOTION_BUSY=false;notionUpdateControls();}
+  });
+  document.getElementById("notionTest").addEventListener("click",async()=>{
+    if(!NOTION_BRIDGE||!NOTION_CONFIGURED||NOTION_BUSY) return;
+    NOTION_BUSY=true; notionUpdateControls(); notionSetStatus("Test de l'accès Notion…");
+    try{
+      const result=await notionRequest("api/notion/test","POST",{});
+      notionSetStatus(`Accès Notion valide${result.parentTitle?` : « ${result.parentTitle} »`:"."}`,"ok");
+    }catch(err){notionSetStatus(err.message||"Test de connexion impossible.","error");}
+    finally{NOTION_BUSY=false;notionUpdateControls();}
+  });
+  document.getElementById("notionDisconnect").addEventListener("click",async()=>{
+    if(!NOTION_BRIDGE||NOTION_BUSY) return;
+    NOTION_BUSY=true; notionUpdateControls();
+    try{
+      await notionRequest("api/notion/disconnect","POST",{});
+      NOTION_CONFIGURED=false; document.getElementById("notionToken").value="";
+      notionSetStatus("Intégration déconnectée de ce serveur.","warn"); notionShowResult("La clé a été effacée de la mémoire du pont local.");
+    }catch(err){notionSetStatus(err.message||"Déconnexion impossible.","error");}
+    finally{NOTION_BUSY=false;notionUpdateControls();}
+  });
+  document.getElementById("notionSync").addEventListener("click",async()=>{
+    if(!LASTFILE||!NOTION_BRIDGE||!NOTION_CONFIGURED||NOTION_BUSY) return;
+    NOTION_BUSY=true; notionUpdateControls(); notionSetStatus("Envoi des données du projet vers Notion…");
+    notionShowResult("Préparation de la synchronisation…");
+    try{
+      const result=await notionRequest("api/notion/sync","POST",{
+        project:LASTFILE,
+        appContext:{dateAffichee:sel,prioritesEpinglees:pins}
+      });
+      const tasks=result.tasks||0, events=result.events||0;
+      notionShowResult(`Synchronisation terminée : ${tasks} tâche${tasks>1?"s":""}, ${events} événement${events>1?"s":""}. La page du projet a été ${result.created?"créée":"mise à jour"}.`,result.url||"");
+      notionSetStatus("Synchronisation terminée.","ok");
+    }catch(err){notionShowResult(err.message||"La synchronisation a échoué.");notionSetStatus("Échec de synchronisation.","error");}
+    finally{NOTION_BUSY=false;notionUpdateControls();}
+  });
+  notionUpdateProjectMeta(); notionLoadStatus();
+}
+
 let VIEW="jour";
 function setView(v){
-  if(v!=="jour"&&v!=="taches"&&v!=="ia") v="jour";
+  if(v!=="jour"&&v!=="taches"&&v!=="ia"&&v!=="notion") v="jour";
   VIEW=v;
   document.querySelectorAll(".maintabs button").forEach(b=>b.setAttribute("aria-selected",String(b.dataset.view===v)));
-  const vj=document.getElementById("view-jour"), vt=document.getElementById("view-taches"), via=document.getElementById("view-ia");
+  const vj=document.getElementById("view-jour"), vt=document.getElementById("view-taches"), via=document.getElementById("view-ia"), vn=document.getElementById("view-notion");
   vj.hidden=v!=="jour"; vj.style.display=v==="jour"?"flex":"none";
   vt.hidden=v!=="taches"; vt.style.display=v==="taches"?"flex":"none";
   via.hidden=v!=="ia"; via.style.display=v==="ia"?"flex":"none";
+  vn.hidden=v!=="notion"; vn.style.display=v==="notion"?"flex":"none";
   document.querySelector(".nav").style.visibility=v==="jour"?"visible":"hidden";
   if(v==="taches"){document.getElementById("title").textContent="Toutes les tâches";renderAllTasks();}
   else if(v==="ia"){document.getElementById("title").textContent="Assistant IA";aiUpdateProjectMeta();}
+  else if(v==="notion"){document.getElementById("title").textContent="Synchronisation Notion";notionUpdateProjectMeta();}
   else render();
   try{store.set("pilotage-vue",v)}catch(e){}
   try{store.set("pilotage-vue-date",sel)}catch(e){}
@@ -1841,6 +2021,7 @@ bindSettings();
 applySettings(false);
 firstRunHint();
 aiInitUI();
+notionInitUI();
 setMode("nofile"); refreshSetup();
 render();
 (function(){
