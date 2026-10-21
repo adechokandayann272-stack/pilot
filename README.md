@@ -54,3 +54,21 @@ Les préférences sont **propres à ce navigateur** (clé `pilotage-reglages`) :
 
 Aucune police n'est téléchargée : le choix se fait parmi des familles présentes sur la machine,
 pour que l'application reste utilisable hors ligne.
+
+## Assistant IA
+
+L'onglet **Assistant IA** permet d'interroger le projet ouvert avec une clé API personnelle :
+OpenAI, Anthropic (Claude), Google Gemini ou un endpoint compatible avec l'API OpenAI
+(par exemple un service compatible Mistral, OpenRouter ou Ollama). Renseignez le fournisseur,
+le modèle, l'URL d'API et la clé, puis enregistrez la connexion. Les identifiants des modèles
+proposés par défaut sont modifiables selon les modèles disponibles chez votre fournisseur.
+
+L'application étant statique et sans serveur, les requêtes partent directement du navigateur.
+À chaque question, le fichier complet du projet (tâches, agenda, suivis, commentaires, noms et
+historique), la date affichée, les priorités épinglées et les derniers échanges réussis sont
+envoyés au fournisseur choisi. La clé API est également transmise directement au fournisseur.
+La connexion dépend de ses autorisations CORS. N'utilisez cette fonction qu'avec un fournisseur
+approuvé pour les données concernées. La clé est conservée uniquement en mémoire de la page par
+défaut ; si « Mémoriser la clé » est coché, elle est enregistrée **en clair dans le stockage local
+du navigateur**. Pour un usage d'équipe ou des données sensibles, privilégiez une passerelle serveur
+sécurisée plutôt que le stockage d'une clé côté navigateur.
